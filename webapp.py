@@ -4,7 +4,13 @@ st.title("Codenames")
 
 # GAME BOARD
 
+#st.write("")
+
+
+
 cols = st.columns(5)
+
+#click to guess a word
 
 for i in range(len(cols)):
     with(cols[i]):
