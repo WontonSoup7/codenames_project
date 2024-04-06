@@ -1,5 +1,6 @@
 import streamlit as st 
 import random
+import numpy as np
 
 st.title("Codenames")
 
@@ -20,24 +21,33 @@ board = []
 def generate_board():
     global board
     board = board + assassin_word + neutral_words + red_words + blue_words
-    print(board)
+    #print(board)
     random.shuffle(board)
+    #print(board)
+    board = np.array(board)
+    board = np.reshape(board, (5, 5)) #assume board has 25 words
     print(board)
+    cols = st.columns(5)
+    for i in range(len(cols)):
+        with(cols[i]):
+            for x in range(5):
+                st.button(label=board[i][x])
 
 generate_board = st.button("Generate board", on_click=generate_board)
 
 
 
-cols = st.columns(5)
+#cols = st.columns(5)
 
 #click to guess a word
 
 #maybe move this for loop into generate_board?? + for the labels put the words in the board
+"""
 for i in range(len(cols)):
     with(cols[i]):
         for x in range(5):
             st.button(label=("word" + str(i) + str(x)))
-
+"""
 """
 with cols[0]:
     st.button(label="word")
