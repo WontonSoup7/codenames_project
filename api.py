@@ -1,15 +1,13 @@
 from openai import OpenAI
 import random
 
-# Load your API key from an environment variable
-# from dotenv import load_dotenv
-# import os
-# load_dotenv()
+from dotenv import load_dotenv
+import os
 
-OPENAI_API_KEY = "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"
-client = OpenAI(
-    api_key = OPENAI_API_KEY 
-)
+# Load your API key from an environment variable
+load_dotenv()
+OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
+client = OpenAI(api_key=OPEN_AI_API_KEY)
 
 # Define the Codenames board (25 words for simplicity)
 board_words = [
