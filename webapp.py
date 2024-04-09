@@ -26,25 +26,33 @@ words_dict["assassin"] = random.sample([w for w in words if (w not in words_dict
 if 'words_dict' not in st.session_state:
     st.session_state.words_dict = words_dict
 
+if 'test' not in st.session_state:
+    st.session_state.test = [] 
 
-con_num = 0
+def click(i):
+    st.session_state.test.append(i) #this works
+    #st.write(st.session_state)
+    #st.color_picker(st.session_state.words[i], "#33FF8D")
+    
+
 cols = st.columns(5)
 buttons = []
-for i in range(len(cols)):
-    with(cols[i]):
-        for x in range(5):
-                button = st.button(label=st.session_state.words[(i*5 + x)])
-                buttons.append(button)
+
+for i in range(len(st.session_state.words)):
+    with(cols[i // 5]):
+        button = st.button(label=st.session_state.words[i], key=i, on_click=click, args=[i])
+        buttons.append(button)
+ 
 
 if 'board_cols' not in st.session_state:
     st.session_state.board_cols = cols
 
+
+
 if 'board_buttons' not in st.session_state:
      st.session_state.board_buttons = buttons
 
-if 'button_clicks' not in st.session_state:
-    st.session_state.button_clicks = [False] * len(buttons)
 
-
+st.write(st.session_state.words_dict)
 
 #st.write(st.session_state)
