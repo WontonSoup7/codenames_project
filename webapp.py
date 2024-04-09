@@ -14,7 +14,7 @@ def generate_guess(words):
         guess = words[random.randrange(0, 24)]
     return guess
 
-teams = ["Red", "Blue", "Neutral", "Assassin"]
+values = ["Red", "Blue", "Neutral", "Assassin"]
 
 # GAME BOARD
 word_list =  open('wordlist-eng.txt', 'r').readlines()
@@ -35,22 +35,6 @@ if 'words' not in st.session_state:
     st.session_state.words = words
     st.session_state.words_dict = words_dict
 
-def click(i):
-    st.session_state.test.append(i) #this works
-    #st.write(st.session_state)
-    #st.color_picker(st.session_state.words[i], "#33FF8D")
-
-if 'board_cols' not in st.session_state:
-    cols = st.columns(5)
-    buttons = []
-    for i in range(len(st.session_state.words)):
-        with(cols[i // 5]):
-            print(i)
-            button = st.button(label=st.session_state.words[i], key=i, on_click=click, args=[i])
-            buttons.append(button)
-    st.session_state.board_cols = cols
-    st.session_state.board_buttons = buttons
-
 # words_dict["blue"] = random.sample(words, 9)
 # words_dict["red"] = random.sample([w for w in words if (w not in words_dict["blue"])], 9)
 # words_dict["neutral"] = random.sample([w for w in words if (w not in words_dict["blue"] and w not in words_dict["red"])], 6)
@@ -58,6 +42,30 @@ if 'board_cols' not in st.session_state:
 
 if 'test' not in st.session_state:
     st.session_state.test = [] 
+
+def click(i):
+    st.session_state.test.append(i) #this works
+    #st.write(st.session_state)
+    #st.color_picker(st.session_state.words[i], "#33FF8D")
+    
+
+cols = st.columns(5)
+buttons = []
+for i in range(len(st.session_state.words)):
+    with(cols[i // 5]):
+        print(i)
+        button = st.button(label=st.session_state.words[i], key=i, on_click=click, args=[i])
+        buttons.append(button)
+ 
+
+if 'board_cols' not in st.session_state:
+    st.session_state.board_cols = cols
+
+
+
+if 'board_buttons' not in st.session_state:
+     st.session_state.board_buttons = buttons
+
 
 st.write(st.session_state.words_dict)
 
