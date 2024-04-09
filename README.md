@@ -10,6 +10,6 @@ Setup Instructions:
    1. Add the venv to gitignore if not already ignored
 6. pip install -r requirements.txt
 
-If you need to add a package, install the package generate a new 
+If you need to add a package, install the package and generate a new 
 requirements.txt with the following command:\
 ```pip freeze requirements.txt```
