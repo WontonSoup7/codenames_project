@@ -24,9 +24,12 @@ team_blue_words = ["King", "Pan", "Square", "Press", "Seal", "Bear", "Spike", "C
 neutral_words = ["Palm", "Crane", "Rock", "Stick", "Tag", "Disease", "Yard"]
 assassin_word = ["Pitch"]
 
-def generate_clue(words):
+def generate_clue(red_words, blue_words, neutral_words, assassin_word):
     #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
-    prompt = f"Act as a spymaster for the red team in Codenames game. The red team words are {words}. Generate a clue for Codenames based on these words."
+    prompt = f"""Act as a spymaster for the red team in Codenames game. 
+    The red team words are {red_words}. The blue team words are {blue_words}. The neutral words are {neutral_words}.
+    The assassin word is {assassin_word}.
+    Generate a clue for the red team Codenames based on these words."""
 
 
     response = client.chat.completions.create(
@@ -65,7 +68,7 @@ if __name__ == "__main__":
     #selected_words = random.choice(board_words)
 
     #clue = generate_clue(selected_words)
-    clue = generate_clue(team_red_words)
+    clue = generate_clue(team_red_words, team_blue_words, neutral_words, assassin_word)
     print(f"Spymaster's Clue: {clue}")
     
     guess = guess_word(clue, board_words)
