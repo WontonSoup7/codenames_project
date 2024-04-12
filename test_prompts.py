@@ -22,7 +22,7 @@ board_words = [
 team_red_words = ["Egypt", "Pitch", "Deck", "Well", "Fair", "Tooth", "Staff", "Bill", "Shot"]
 team_blue_words = ["King", "Pan", "Square", "Press", "Seal", "Bear", "Spike", "Center", "Face"]
 neutral_words = ["Palm", "Crane", "Rock", "Stick", "Tag", "Disease", "Yard"]
-assassin_word = ["Pitch"]
+assassin_word = ["Battery"] #was originally "Pitch" but that is a red team word so i wanted it to be different
 
 def generate_clue(red_words, blue_words, neutral_words, assassin_word):
     #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
