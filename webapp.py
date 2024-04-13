@@ -1,9 +1,10 @@
 import streamlit as st 
 import random
 import numpy as np
-
+import json 
 st.title("Codenames")
 
+ss = st.session_state
 # Dummy api calls for testing
 def generate_clue():
     return ""
@@ -23,7 +24,7 @@ teams = ["Red", "Blue", "Neutral", "Assassin"]
 #might have to make another page for GPT as the guesser....
 
 # Generate words and assign them
-if 'words' not in st.session_state:
+if 'words' not in ss:
     word_list =  open('wordlist-eng.txt', 'r').readlines()
     word_list = [word.strip() for word in word_list]
     words = random.sample(word_list, 25)
@@ -33,59 +34,59 @@ if 'words' not in st.session_state:
             words_dict[words[8*i + j]] = i
     words_dict[words[-1]] = 3
     random.shuffle(words)
-    st.session_state.words = words
-    st.session_state.words_dict = words_dict
+    ss.words = words
+    ss.words_dict = words_dict
 
     # swap these two when all buttons need to be disabled
-    st.session_state.clicked = {word:False for word in words_dict}
-    st.session_state.all_disabled = {word:True for word in words_dict}
+    ss.clicked = {word:False for word in words_dict}
+    ss.all_disabled = {word:True for word in words_dict}
 
-    st.session_state.guessed = {"Red":8, "Blue":8, "Neutral":8, "Assassin":1}
+    ss.guessed = {"Red":8, "Blue":8, "Neutral":8, "Assassin":1}
+    ss.by_team = {"Red":[], "Blue":[], "Neutral":[], "Assassin":[]}
+    for key, val in ss.words_dict.items():   
+        ss.by_team[teams[val]].append(key)
 
 # words_dict["blue"] = random.sample(words, 9)
 # words_dict["red"] = random.sample([w for w in words if (w not in words_dict["blue"])], 9)
 # words_dict["neutral"] = random.sample([w for w in words if (w not in words_dict["blue"] and w not in words_dict["red"])], 6)
 # words_dict["assassin"] = random.sample([w for w in words if (w not in words_dict["blue"] and w not in words_dict["red"] and w not in words_dict["neutral"])], 1)   
 
-if 'test' not in st.session_state:
-    st.session_state.test = [] 
+# for key, val in enumerate(ss.guessed):
+ss = ss
+if 'test' not in ss:
+    ss.test = [] 
 
-if 'logs' not in st.session_state:
-    st.session_state.logs = []
+if 'logs' not in ss:
+    ss.logs = []
 
 def click(name):
-    team = teams[st.session_state.words_dict[name]]
-    st.session_state.logs.append(name + ": " + team)
-    st.session_state.guessed[team] -= 1
-    if not st.session_state.guessed[team]:
-        st.session_state.clicked, st.session_state.all_disabled = st.session_state.all_disabled, st.session_state.clicked
+    team = teams[ss.words_dict[name]]
+    ss.logs.append(name + ": " + team)
+    ss.guessed[team] -= 1
+    ss.by_team[team].remove(name)
+    if not ss.guessed[team] and team != "Neutral":
+        ss.clicked, ss.all_disabled = ss.all_disabled, ss.clicked
         return
-    st.session_state.clicked[name] = not st.session_state.clicked[name]
+    ss.clicked[name] = not ss.clicked[name]
     #this works
-    #st.write(st.session_state)
-    #st.color_picker(st.session_state.words[i], "#33FF8D")
-    
+    #st.write(ss)
+    #st.color_picker(ss.words[i], "#33FF8D")
+
+st.write(ss.guessed)
+rev_teams = st.checkbox(label="Teams", value=False)
+if rev_teams: 
+    for key, val in ss.by_team.items():
+        st.text(key + ": " + json.dumps(val))
+
 cols = st.columns(5)
-for i in range(len(st.session_state.words)):
+for i in range(len(ss.words)):
     with(cols[i // 5]):
-        name = st.session_state.words[i]
+        name = ss.words[i]
         st.button(label=name, key=name, 
                   on_click=click, args=[name],
-                  disabled=st.session_state.clicked[name])
+                  disabled=ss.clicked[name])
 
-st.write(st.session_state.logs)
-st.write(st.session_state.guessed)
-st.write(st.session_state.words_dict)
-# for i in range(st.session_state.words):
-#     st.toggle(st.session_state.words[i])
-# for word in st.session_state.words:
-#     print(word)
-#     st.toggle(st.session_state.word)
-        
+# st.write(ss.logs)
+# st.write(ss.guessed)
+# st.write(ss.words_dict)
 
-# if 'board_cols' not in st.session_state:
-#     st.session_state.board_cols = cols
-
-#st.write(st.session_state.words_dict)
-
-#st.write(st.session_state)
