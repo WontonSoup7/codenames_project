@@ -72,11 +72,7 @@ def click(name):
     #st.write(ss)
     #st.color_picker(ss.words[i], "#33FF8D")
 
-st.write(ss.guessed)
-rev_teams = st.checkbox(label="Teams", value=False)
-if rev_teams: 
-    for key, val in ss.by_team.items():
-        st.text(key + ": " + json.dumps(val))
+
 
 cols = st.columns(5)
 for i in range(len(ss.words)):
@@ -85,6 +81,13 @@ for i in range(len(ss.words)):
         st.button(label=name, key=name, 
                   on_click=click, args=[name],
                   disabled=ss.clicked[name])
+
+st.write(ss.guessed)
+
+rev_teams = st.checkbox(label="Teams", value=False)
+if rev_teams: 
+    for key, val in ss.by_team.items():
+        st.text(key + ": " + json.dumps(val))
 
 # st.write(ss.logs)
 # st.write(ss.guessed)
