@@ -3,7 +3,8 @@ import random
 import numpy as np
 import json 
 st.title("Codenames")
-
+from test_prompts import gen_clue
+from test_prompts import gen_guess
 # RESTART GAME
 def clear_ss():
     for key in ss.keys():
@@ -13,14 +14,14 @@ with st.columns([2, 1, 2])[1]:
 
 ss = st.session_state
 # Dummy api calls for testing
-def gen_clue():
-    return ["Baseball", 3]
+# def gen_clue():
+#     return ["Baseball", 3]
 
-def gen_guess(words):
-    guess = words[random.randrange(0, 24)]
-    while isinstance(words[guess], int):
-        guess = words[random.randrange(0, 24)]
-    return guess
+# def gen_guess(words):
+#     guess = words[random.randrange(0, 24)]
+#     while isinstance(words[guess], int):
+#         guess = words[random.randrange(0, 24)]
+#     return guess
 
 teams = ["Red", "Blue", "Neutral", "Assassin"]
 
@@ -103,8 +104,11 @@ if ss.game_started:
     if ss.gs_left == 0:
         # Guesser
         if ss.role:
-            ss.clue = gen_clue()
-            ss.clue_word, ss.gs_left = ss.clue
+            ss.clue = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
+                               ss.by_team['Neutral'], ss.by_team['Assassin'])
+            ss.clue = ss.clue.split(": ")
+            ss.clue_word, ss.gs_left = ss.clue[0], int(ss.clue[1])
+            print(ss.clue_word, ss.gs_left)
             ss.cm_logs.append(ss.clue)
             ss.gs_logs.append([])
             bt_guess = guess
@@ -118,24 +122,32 @@ if ss.game_started:
     else:
         bt_guess = guess
         if not ss.role:
+            bt_guess = do_nothing
             ss.disable_user_input = True
 
 
+
 def parse_clue():
-    st.write(txt_input)
     ss.clue = ss.user_input.split(": ")
     ss.clue[1] = int(ss.clue[1])
     ss.clue_word, ss.gs_left = ss.clue
     ss.cm_logs.append(ss.clue)
     ss.gs_logs.append([])
     ss.user_input = ""
-    
+
+def call_guesser():
+    parse_clue()
+    gs_array = json.loads(gen_guess(json.dumps(ss.clue), ss.words))
+    print(gs_array)
+    for gs in gs_array:
+        guess(gs)
+
 txt_input = st.text_input(label= "Enter Clue",
     key = "user_input",
     label_visibility="collapsed",
     placeholder= "Word: Number",
     disabled=ss.disable_user_input,
-    on_change=parse_clue)
+    on_change=call_guesser)
 
 if "clue" in ss:
     st.text(ss.clue_word + ": " + str(ss.clue[1])) 

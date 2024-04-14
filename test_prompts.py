@@ -24,12 +24,17 @@ team_blue_words = ["King", "Pan", "Square", "Press", "Seal", "Bear", "Spike", "C
 neutral_words = ["Palm", "Crane", "Rock", "Stick", "Tag", "Disease", "Yard"]
 assassin_word = ["Battery"] #was originally "Pitch" but that is a red team word so i wanted it to be different
 
-def generate_clue(red_words, blue_words, neutral_words, assassin_word):
+def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
     prompt = f"""Act as a spymaster for the red team in Codenames game. 
-    The red team words are {red_words}. The blue team words are {blue_words}. The neutral words are {neutral_words}.
+    The red team words are {red_words}. 
+    The blue team words are {blue_words}. 
+    The neutral words are {neutral_words}.
     The assassin word is {assassin_word}.
-    Generate a clue for the red team Codenames based on these words."""
+    Generate a clue for the red team Codenames based on these words.
+    Your clue must abide by the rules of the Codenames game.
+    The clue must be in the format "Word: Number". 
+    Do not return aynthing else."""
 
 
     response = client.chat.completions.create(
@@ -45,8 +50,15 @@ def generate_clue(red_words, blue_words, neutral_words, assassin_word):
     clue = response.choices[0].message.content
     return clue
 
-def guess_word(clue, board_words):
-    prompt = f"Act as a guesser in Codenames game. Given the clue '{clue}', which of these words: {', '.join(board_words)} is most related?"
+def gen_guess(clue, board_words):
+    prompt = f"""Act as a guesser in Codenames game. 
+    You are given the clue: '{clue}' and the list of words on the 
+    board: {', '.join(board_words)}.
+    Give your guesses in a python array format: "[Guess1, Guess2, Guess3, etc.]". 
+    The number of guesses must match the number provided in the clue.
+    Each guess must be a word on the game board: {', '.join(board_words)}.
+    The guesses must be ordered from your best guess to your worst guess.
+    Do not return anything else besides your array of guesses."""
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
@@ -68,8 +80,8 @@ if __name__ == "__main__":
     #selected_words = random.choice(board_words)
 
     #clue = generate_clue(selected_words)
-    clue = generate_clue(team_red_words, team_blue_words, neutral_words, assassin_word)
+    clue = gen_guess(team_red_words, team_blue_words, neutral_words, assassin_word)
     print(f"Spymaster's Clue: {clue}")
     
-    guess = guess_word(clue, board_words)
+    guess = gen_clue(clue, board_words)
     print(f"Guesser's Guess: {guess}")
