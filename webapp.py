@@ -67,7 +67,6 @@ def guess(name):
     ss.by_team[team].remove(name)
     if not ss.guessed[team] and team != "Neutral":
         toggle_board()
-        ss.game_started = False
         if team == "Red":
             st.text("YOU WIN :)")
         else:

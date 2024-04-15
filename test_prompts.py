@@ -34,10 +34,11 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     These are the bad words: {blue_words}
     These are the neutral words: {neutral_words}
     This is the instant death word: {assassin_word}.
-    Your clue may not have appeard in any of these words.
-    The clue must strongly associate with any number of good words, 
-    weakly associate with the bad words, may associate with the neutral words,
+    Your clue may not have appeared in any of these words.
+    The clue must strongly associate with x number of good words, 
+    weakly associate with all the bad words, may associate with the neutral words,
     and have no association with the instant death word.
+    The clue should have a clear and simple association with the good words.
     The number you give should be the number of words your clue aims to indicate. 
     The clue must be in the format "Word:Number". For example "Bird: 3"
     Do not return aynthing else."""
