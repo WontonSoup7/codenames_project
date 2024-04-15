@@ -150,12 +150,12 @@ def call_guesser():
         try:
             parse_clue()
             ss.gs_array = json.loads(gen_guess(json.dumps(ss.clue), ss.words))
+            for gs in ss.gs_array:
+                guess(gs)
             break
         except:
-            pass
-    print(ss.gs_array)
-    for gs in ss.gs_array:
-        guess(gs)
+            ss.user_input = ""
+            break
 
 txt_input = st.text_input(label= "Enter Clue",
     key = "user_input",
