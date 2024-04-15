@@ -26,15 +26,32 @@ assassin_word = ["Battery"] #was originally "Pitch" but that is a red team word 
 
 def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
-    prompt = f"""Act as a spymaster for the red team in Codenames game. 
-    The red team words are {red_words}. 
-    The blue team words are {blue_words}. 
-    The neutral words are {neutral_words}.
-    The assassin word is {assassin_word}.
-    Generate a clue for the red team Codenames based on these words.
-    Your clue must abide by the rules of the Codenames game.
-    The clue must be in the format "Word: Number". 
+    prompt = f"""
+    You are a codemaster in a codenames game and your job is to 
+    give a clue at the end of this prompt the format "Word: Number" (For example "Bird: 3") 
+    Your clue may not be any of these words. 
+    These are the good words: {red_words} 
+    These are the bad words: {blue_words}
+    These are the neutral words: {neutral_words}
+    This is the instant death word: {assassin_word}.
+    Your clue may not have appeard in any of these words.
+    The clue must strongly associate with any number of good words, 
+    weakly associate with the bad words, may associate with the neutral words,
+    and have no association with the instant death word.
+    The number you give should be the number of words your clue aims to indicate. 
+    The clue must be in the format "Word:Number". For example "Bird: 3"
     Do not return aynthing else."""
+    # prompt = f"""Act as a spymaster for the red team in Codenames game. 
+    # The red team words are {red_words}. 
+    # The blue team words are {blue_words}. 
+    # The neutral words are {neutral_words}.
+    # The assassin word is {assassin_word}.
+    # Generate a clue for the red team Codenames based on these words.
+    # Check your knowledge base for the rules of the codenames game.
+    # Your clue must abide by these rules. For example one of the rules is
+    # that the word must not appear in red team, blue team, neutral, or assassin.
+    # The clue must be in the format "Word:Number". For example "Bird: 3"
+    # Do not return aynthing else."""
 
 
     response = client.chat.completions.create(

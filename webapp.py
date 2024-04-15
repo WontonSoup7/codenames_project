@@ -67,6 +67,7 @@ def guess(name):
     ss.by_team[team].remove(name)
     if not ss.guessed[team] and team != "Neutral":
         toggle_board()
+        ss.game_started = False
         if team == "Red":
             st.text("YOU WIN :)")
         else:
@@ -104,10 +105,18 @@ if ss.game_started:
     if ss.gs_left == 0:
         # Guesser
         if ss.role:
-            ss.clue = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
-                               ss.by_team['Neutral'], ss.by_team['Assassin'])
-            ss.clue = ss.clue.split(": ")
-            ss.clue_word, ss.gs_left = ss.clue[0], int(ss.clue[1])
+            # FOR DEVELOPMENT ONLY
+            while True:
+                try:
+                    ss.clue = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
+                                    ss.by_team['Neutral'], ss.by_team['Assassin'])
+                    # st.text(ss.clue)
+                    ss.clue = ss.clue.split(":")
+                    ss.clue_word, ss.gs_left = ss.clue[0], int(ss.clue[1])
+                    if ss.clue_word.upper() not in ss.words:
+                        break
+                except:
+                    pass
             print(ss.clue_word, ss.gs_left)
             ss.cm_logs.append(ss.clue)
             ss.gs_logs.append([])
@@ -136,10 +145,16 @@ def parse_clue():
     ss.user_input = ""
 
 def call_guesser():
-    parse_clue()
-    gs_array = json.loads(gen_guess(json.dumps(ss.clue), ss.words))
-    print(gs_array)
-    for gs in gs_array:
+    # FOR DEVELOPMENT ONLY
+    while True:
+        try:
+            parse_clue()
+            ss.gs_array = json.loads(gen_guess(json.dumps(ss.clue), ss.words))
+            break
+        except:
+            pass
+    print(ss.gs_array)
+    for gs in ss.gs_array:
         guess(gs)
 
 txt_input = st.text_input(label= "Enter Clue",
