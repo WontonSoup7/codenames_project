@@ -11,24 +11,30 @@ client = OpenAI(api_key=OPEN_AI_API_KEY)
 
 # Define the Codenames board (25 words for simplicity)
 all_words = [
-    "DIVER", "TEMPLE", "HOOD", "ROUND", "CHINA", "TRAIN", "COVER", "STICK", "LION", "CAST", "MINE", "HORSESHOE", "ROW", "CONCERT", "BRUSH", "LASER", "PHOENIX", "BELL", "DROP", "SPIKE", "NINJA", "COPPER", "ROSE", "FAIR", "ORANGE"
+    "WAKE", "PAPER", "BOX", "BATTERY", "STOCK", "CIRCLE", "HOOD", "SOLDIER", "HORN", "KETCHUP", "LOCK", "DANCE", "SKYSCRAPER", "PYRAMID", "PRESS", "TABLE", "SOUL", "COMIC", "LITTER", "SINK", "PARK", "HELICOPTER", "HEAD", "TRIP", "PLATE"
 ]
 
 # Teams' words (for simplicity, not used in clue generation/guessing logic here)
-team_red_words = ["DIVER", "TEMPLE", "HOOD", "ROUND", "CHINA", "TRAIN", "COVER", "STICK"]
-team_blue_words = ["LION", "CAST", "MINE", "HORSESHOE", "ROW", "CONCERT", "BRUSH", "LASER"]
-neutral_words = ["PHOENIX", "BELL", "DROP", "SPIKE", "NINJA", "COPPER", "ROSE", "FAIR"]
-assassin_word = ["ORANGE"] 
+team_red_words =  ["WAKE", "PAPER", "BOX", "BATTERY", "STOCK", "CIRCLE", "HOOD", "SOLDIER"]
+team_blue_words = ["HORN", "KETCHUP", "LOCK", "DANCE", "SKYSCRAPER", "PYRAMID", "PRESS", "TABLE"]
+neutral_words = ["SOUL", "COMIC", "LITTER", "SINK", "PARK", "HELICOPTER", "HEAD", "TRIP"]
+assassin_word = ["PLATE"] 
 
 
-spymaster_output = ["('Ensemble', 4)\n['ROW', 'CONCERT', 'BRUSH', 'LASER']"]
-guesser_output =  ["['CONCERT', 'BELL', 'PHOENIX', 'DIVER']"]
 
 def generate_clue(board_words, team_words, assassin):
-    prompt = f"This is the entire word list: {board_words}. This word list is your team's words: {team_words}. Give the relationship word that would describe the relationship of the some of the words on your team's list. The relationship word should not be in the provided list and should be specific enough to guess the exact words that are related from the list. The relationship word must not be related to other words than your team's word list. The relationship word must be one word and not related to {assassin}. Give the relationship word and number of the related words. Output(relationship_word, number) in tuple format, and related words in list format without any explanation. The relationship word cannot be from the list. Your response must be 2 lines: one tuple in first line, and one list in the other"
+    # clue only
+    prompt = f"This is the entire word list: {board_words}. This word list is your team's words: {team_words}. Give the relationship word that would describe the relationship of the 2 or more of the words on your team's list. The relationship word should not be in the provided list and should be specific enough to guess the exact words that are related from the list. The relationship word must not be related to other words than your team's word list. The relationship word must be one word and not related to {assassin}. Give the relationship word and number of the related words. Output(relationship_word, number) in tuple format. Your response must be 1 line: one tuple. No empty newline needed in between"
+   
+    # clue & answers
+    # prompt = f"This is the entire word list: {board_words}. This word list is your team's words: {team_words}. Give the relationship word that would describe the relationship of the some of the words on your team's list. The relationship word should not be in the provided list and should be specific enough to guess the exact words that are related from the list. The relationship word must not be related to other words than your team's word list. The relationship word must be one word and not related to {assassin}. Give the relationship word and number of the related words. Output(relationship_word, number) in tuple format, and related words in list format without any explanation. The relationship word cannot be from the list. Your response must be 2 lines: one tuple in first line, and one list in the other. No empty newline needed in between"
+
+    # clue & answer & explanation
+    # prompt = f"This is the entire word list: {board_words}. This word list is your team's words: {team_words}. Give the relationship word that would describe the relationship of the some of the words on your team's list. The relationship word should not be in the provided list and should be specific enough to guess the exact words that are related from the list. The relationship word must not be related to other words than your team's word list. The relationship word must be one word and not related to {assassin}. Give the relationship word and number of the related words. Output(relationship_word, number) in tuple format, and related words in list format without any explanation. The relationship word cannot be from the list. Your response must be 3 lines: one tuple in first line, and one list in the second line, and explanataion in the third line. No empty newline needed in between"
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
+        # model="gpt-4-turbo",
         messages=[
             {
                 "role" : "user", 
@@ -47,6 +53,7 @@ def guess_word(clue, board_words):
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
+        # model="gpt-4-turbo",
         messages=[
             {
                 "role" : "user", 
@@ -72,7 +79,11 @@ def response_format(raw):
 def match(all_words, team_words, assassin_word):
     spymaster = generate_clue(all_words, team_words, assassin_word)
     # spymaster = random.choice(spymaster_output)
-    clue, answer = spymaster.split("\n")
+    # print(spymaster)
+    try:
+        clue, answer = spymaster.split("\n")
+    except ValueError:
+        clue, _, answer = spymaster.split("\n")
 
     clue = response_format(clue)
     clue[1] = int(clue[1])
@@ -110,7 +121,7 @@ def validation(all_words, team_words, clue, answer, guess):
             return False
     
     return True
-    
+
 
 def main():
     matches = 1
@@ -122,12 +133,13 @@ def main():
     curr_team = "red"
     curr_lst = team_red_words
 
-    while team_red_words or team_blue_words:
-        print(f"match {matches}, {curr_team} team")
+    while team_red_words:
+        print(f"Turn {matches}, {curr_team} team")
 
         clue, answer, guess = match(all_words, curr_lst, assassin_word)
         if validation(all_words, curr_lst, clue, answer, guess):
-            for ans in answer:
+            # for ans in answer:
+            for ans in curr_lst:
                 partial = 0
                 if ans in guess:
                     print(f"{ans} guessed correctly!")
@@ -136,9 +148,6 @@ def main():
                     all_words.remove(ans)
                     curr_lst.remove(ans)
                     
-                    if not curr_lst:
-                        curr_team = "blue"
-                        curr_lst = team_blue_words
 
             if partial == len(ans):
                 correct += 1
@@ -150,10 +159,16 @@ def main():
             error += 1
 
         matches += 1
+        print()
 
-    print(f"Statistics: total {matches - 1} matches")
+    print(f"Statistics: total {matches - 1} turns")
     print(f"Correct: {correct}")
     print(f"Partial Correct: {partial_correct}")
     print(f"Incorrect: {incorrect}")
     print(f"Error: {error}")
-main()
+
+
+# main()
+for _ in range(30):
+    print(generate_clue(all_words, team_red_words, assassin_word))
+    print()
