@@ -2,6 +2,7 @@ import streamlit as st
 import random
 import numpy as np
 import json 
+import sqlite3
 st.title("Codenames")
 from test_prompts import gen_clue
 from test_prompts import gen_guess
@@ -11,6 +12,31 @@ def clear_ss():
         del ss[key]
 with st.columns([2, 1, 2])[1]:
     st.button("New Game", on_click=clear_ss)
+
+conn = sqlite3.connect('codenames.db', timeout=60)
+c = conn.cursor()
+
+c.execute("""
+    CREATE TABLE IF NOT EXISTS GAME(
+    ID INTEGER PRIMARY KEY,
+    NUM_TURNS INT NOT NULL DEFAULT 0,
+    BOARD_ID INTEGER,
+    FOREIGN KEY (BOARD_ID) REFERENCES BOARD(ID) ON DELETE CASCADE
+    )""")
+c.execute("""
+    CREATE TABLE IF NOT EXISTS BOARD(
+    ID INTEGER PRIMARY KEY,
+    WORD TEXT,
+    TEAM TEXT, --red, blue, neutral, or assassin
+    GUESSED BOOLEAN
+    )""")
+
+c.execute("INSERT INTO BOARD(WORD, TEAM, GUESSED) VALUES ('W', 'RED', '1')")
+conn.commit()
+c.execute("SELECT WORD FROM BOARD")
+w = c.fetchone()
+#st.write(w)
+st.title(w)
 
 ss = st.session_state
 # Dummy api calls for testing
