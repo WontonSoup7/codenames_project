@@ -84,6 +84,9 @@ if 'words' not in ss:
     for key, val in ss.words_dict.items():   
         ss.by_team[teams[val]].append(key)
 
+    #new addition
+    ss.num_turns = 0
+
 def get_db_connection():
     conn = sqlite3.connect('codenames.db', timeout=60)
     return conn
@@ -189,11 +192,12 @@ def guess(name):
         if team == "Red":
             st.text("YOU WIN :)")
             #c.execute("INSERT INTO GAME(ID, WIN) VALUES(?, ?)", (ss.game_id, 1))
-            insert_game(game_id=ss.game_id, win=1)
+            insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=1)
         else:
             st.text("YOU LOSE :'(")
             #c.execute("INSERT INTO GAME(ID, WIN) VALUES(?, ?)", (ss.game_id, 0))
-            insert_game(game_id=ss.game_id, win=0)
+            insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=0)
+    
 
         #JUST for test purposeses- delete these next lines (after this comment and before return) later
         #c.execute("SELECT * FROM GAME")
@@ -208,6 +212,7 @@ def guess(name):
         return
     elif team != "Red":
         ss.gs_left = 0
+        ss.num_turns += 1 #increment number of turns after incorrect guess
 
     ss.clicked[name] = not ss.clicked[name]
 
