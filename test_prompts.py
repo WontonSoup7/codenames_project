@@ -27,21 +27,41 @@ assassin_word = ["Battery"] #was originally "Pitch" but that is a red team word 
 def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
     prompt = f"""
-    You are a codemaster in a codenames game and your job is to 
-    give a clue at the end of this prompt the format "Word: Number" (For example "Bird: 3") 
-    Your clue may not be any of these words. 
-    These are the good words: {red_words} 
-    These are the bad words: {blue_words}
-    These are the neutral words: {neutral_words}
-    This is the instant death word: {assassin_word}.
+
+    Examples:
+    ___
+    Input:
+    Red words: [BOMB, OPERA, PISTOL, BARK, BATTERY, DISEASE, ROW, BEAR]
+    Blue words: [MARBLE, MILLIONAIRE, PORT, BOTTLE, TAP, VAN, NEEDLE, PUMPKIN]
+    Assassin word: [KNIGHT]
+    Civilian words: [BAR, ICE, BERLIN, PLOT, CYCLE, BOLT, RULER, CAT]
+    Output:
+    Clue: Loud, 4
+    Logic: 
+    [BOMB, OPERA, PISTOL, BARK]
+    ___
+
+    You are the red codemaster in a codenames game and your job is to 
+    give a clue at the end of the prompt given these words 
+    (Note: Your clue may not be any of these words):
+    Red words: {red_words} 
+    Blue words: {blue_words}
+    Civilian words: {neutral_words}
+    Assassin: {assassin_word}.
     Your clue may not have appeared in any of these words.
-    The clue must strongly associate with x number of good words, 
-    weakly associate with all the bad words, may associate with the neutral words,
-    and have no association with the instant death word.
-    The clue should have a clear and simple association with the good words.
-    The number you give should be the number of words your clue aims to indicate. 
-    The clue must be in the format "Word:Number". For example "Bird: 3"
-    Do not return aynthing else."""
+    The clue must be in the format "Clue: Word,Number". For example "Clue: Bird,3"
+    """
+    # THe clue must be semantically far from all the bad words, 
+    # have little semantically association with the neutral words,
+    # and have no semantic association with the instant death word.
+    # Pick the words in good words that have the strongest semantic connection
+    # and derive a clue that is semantically relates to these words.
+    # The number you give should be the number of words your clue aims to indicate.
+    # The clue should encourage diversity.
+    # The clue must be in the format "Word:Number". For example "Bird: 3"
+    # Do not return aynthing else."""
+
+
     # prompt = f"""Act as a spymaster for the red team in Codenames game. 
     # The red team words are {red_words}. 
     # The blue team words are {blue_words}. 
@@ -69,13 +89,21 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     return clue
 
 def gen_guess(clue, board_words):
-    prompt = f"""Act as a guesser in Codenames game. 
+    prompt = f"""Act as a guesser in Codenames game.
     You are given the clue: '{clue}' and the list of words on the 
-    board: {', '.join(board_words)}.
-    Give your guesses in a python array format: "[Guess1, Guess2, Guess3, etc.]". 
-    The number of guesses must match the number provided in the clue.
-    Each guess must be a word on the game board: {', '.join(board_words)}.
+    board: {board_words}.
+    Give your best guesses from {board_words} in a python array format: "[Guess1, Guess2, Guess3, etc.]". 
+    Example:
+    ___
+    Input: 
+    Clue: [Loud, 4], Board Words: ['BOMB', 'PORT', 'BOLT', 'CYCLE', 'BATTERY', 'DISEASE', 'MARBLE', 'CAT', 'VAN', 'BEAR', 'ROW', 'PISTOL', 'NEEDLE', 'PUMPKIN', 'BAR', 'BERLIN', 'OPERA', 'ICE', 'TAP', 'PLOT', 'RULER', 'MILLIONAIRE', 'BARK', 'BOTTLE', 'KNIGHT']
+    Output: 
+    [BOMB, OPERA, PISTOL, BARK] 
+    ___
+    There must be {clue[1]} number of guesses. 
     The guesses must be ordered from your best guess to your worst guess.
+    Each guess must be one of these words: {board_words}.
+    The number of guesses must match the number provided in the clue.
     Do not return anything else besides your array of guesses."""
 
     response = client.chat.completions.create(

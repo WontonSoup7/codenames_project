@@ -13,30 +13,30 @@ def clear_ss():
 with st.columns([2, 1, 2])[1]:
     st.button("New Game", on_click=clear_ss)
 
-conn = sqlite3.connect('codenames.db', timeout=60)
-c = conn.cursor()
+# conn = sqlite3.connect('codenames.db', timeout=60)
+# c = conn.cursor()
 
-c.execute("""
-    CREATE TABLE IF NOT EXISTS GAME(
-    ID INTEGER PRIMARY KEY,
-    NUM_TURNS INT NOT NULL DEFAULT 0,
-    BOARD_ID INTEGER,
-    FOREIGN KEY (BOARD_ID) REFERENCES BOARD(ID) ON DELETE CASCADE
-    )""")
-c.execute("""
-    CREATE TABLE IF NOT EXISTS BOARD(
-    ID INTEGER PRIMARY KEY,
-    WORD TEXT,
-    TEAM TEXT, --red, blue, neutral, or assassin
-    GUESSED BOOLEAN
-    )""")
+# c.execute("""
+#     CREATE TABLE IF NOT EXISTS GAME(
+#     ID INTEGER PRIMARY KEY,
+#     NUM_TURNS INT NOT NULL DEFAULT 0,
+#     BOARD_ID INTEGER,
+#     FOREIGN KEY (BOARD_ID) REFERENCES BOARD(ID) ON DELETE CASCADE
+#     )""")
+# c.execute("""
+#     CREATE TABLE IF NOT EXISTS BOARD(
+#     ID INTEGER PRIMARY KEY,
+#     WORD TEXT,
+#     TEAM TEXT, --red, blue, neutral, or assassin
+#     GUESSED BOOLEAN
+#     )""")
 
-c.execute("INSERT INTO BOARD(WORD, TEAM, GUESSED) VALUES ('W', 'RED', '1')")
-conn.commit()
-c.execute("SELECT WORD FROM BOARD")
-w = c.fetchone()
-#st.write(w)
-st.title(w)
+# c.execute("INSERT INTO BOARD(WORD, TEAM, GUESSED) VALUES ('W', 'RED', '1')")
+# conn.commit()
+# c.execute("SELECT WORD FROM BOARD")
+# w = c.fetchone()
+# #st.write(w)
+# st.title(w)
 
 ss = st.session_state
 # Dummy api calls for testing
@@ -59,13 +59,18 @@ if 'words' not in ss:
     word_list = [word.strip() for word in word_list]
     words = random.sample(word_list, 25)
     words_dict = {}
-    for i in range(3):
-        for j in range(8):
-            words_dict[words[8*i + j]] = i
-    words_dict[words[-1]] = 3
+    card_vals = [8, 7, 9, 1]
+    ctr = 0
+    for word in words:
+        words_dict[word] = ctr
+        card_vals[ctr] -= 1
+        if not card_vals[ctr]:
+            ctr += 1
+
     random.shuffle(words)
     ss.words = words
     ss.words_dict = words_dict
+    ss.curr_dict = {key:val for key, val in ss.words_dict.items()}
 
     # swap these two when all buttons need to be disabled
     ss.clicked = {word:False for word in words_dict}
@@ -74,8 +79,13 @@ if 'words' not in ss:
     ss.guessed = {"Red":8, "Blue":8, "Neutral":8, "Assassin":1}
     ss.gs_left = 0
     ss.by_team = {"Red":[], "Blue":[], "Neutral":[], "Assassin":[]}
+    ss.error_ct = 0
     for key, val in ss.words_dict.items():   
         ss.by_team[teams[val]].append(key)
+
+if "error_ct" not in ss:
+    ss.error_ct = 0
+st.write(ss.error_ct)
 
 ss = ss
 if 'test' not in ss:
@@ -86,10 +96,12 @@ if 'cm_logs' not in ss:
 
 # GAME BOARD BUTTON CALLBACK
 def guess(name):
+    name = name.upper()
     team = teams[ss.words_dict[name]]
     ss.gs_logs[-1].append(name)
     ss.gs_left -= 1
     ss.guessed[team] -= 1
+    del ss.curr_dict[name]
     ss.by_team[team].remove(name)
     ss.clicked[name] = not ss.clicked[name]
     if not ss.guessed[team] and team != "Neutral":
@@ -136,12 +148,17 @@ if ss.game_started:
                     ss.clue = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
                     print(ss.clue)
+                    ss.clue = ss.clue.split(": ")
+                    ss.clue = ss.clue[1].split(", ")
+                    ss.clue[1] = int(ss.clue[1])
+                    ss.clue_word, ss.gs_left = ss.clue
                     # st.text(ss.clue)
-                    ss.clue = ss.clue.split(":")
-                    ss.clue_word, ss.gs_left = ss.clue[0], int(ss.clue[1])
                     if ss.clue_word.upper() not in ss.words:
+                        print("CLUE: " + json.dumps(ss.clue))
                         break
-                except:
+                    st.error_ct += 1
+                except Exception as e:
+                    print(e)
                     pass
             print(ss.clue_word, ss.gs_left)
             ss.cm_logs.append(ss.clue)
@@ -172,19 +189,29 @@ def parse_clue():
 
 def call_guesser():
     # FOR DEVELOPMENT ONLY
-    while True:
-        try:
-            parse_clue()
-            ss.gs_array = json.loads(gen_guess(json.dumps(ss.clue), ss.words))
-            break
-        except: 
-            st.write("Clue Given in Incorrect Format")
-            ss.user_input = ""
-            ss.gs_array = []
-            break
-    for gs in ss.gs_array:
-        if guess(gs):
-            break
+    try:
+        parse_clue()
+        print(ss.curr_dict.keys())
+        while True: 
+            try:
+                ss.gs_array = gen_guess(clue=ss.clue, board_words = json.dumps([key for key in ss.curr_dict.keys()]))
+                ss.gs_array = json.loads(ss.gs_array)
+                for gs in ss.gs_array:
+                    print("guess: " + gs)
+                    ss.curr_dict[gs] += 0
+                break
+            except Exception as e: 
+                ss.user_input = ""
+                ss.gs_array = []
+                print(e)
+        for gs in ss.gs_array:
+            if guess(gs):
+                break
+    except Exception as e:
+        st.write("Clue Given in Incorrect Format")
+        print(e)
+
+    
 
 txt_input = st.text_input(label= "Enter Clue",
     key = "user_input",
