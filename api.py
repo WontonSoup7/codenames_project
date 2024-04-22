@@ -11,25 +11,27 @@ client = OpenAI(api_key=OPEN_AI_API_KEY)
 
 # Define the Codenames board (25 words for simplicity)
 all_words = [
-    "WAKE", "PAPER", "BOX", "BATTERY", "STOCK", "CIRCLE", "HOOD", "SOLDIER", "HORN", "KETCHUP", "LOCK", "DANCE", "SKYSCRAPER", "PYRAMID", "PRESS", "TABLE", "SOUL", "COMIC", "LITTER", "SINK", "PARK", "HELICOPTER", "HEAD", "TRIP", "PLATE"
+    "DRAGON", "GREEN",  "BAR", "CHOCOLATE", "PITCH", "SUIT", "RING", "CONDUCTOR", "CASINO", "HOLLYWOOD", "SATURN", "BOARD", "NURSE", "PLATYPUS", "BUFFALO", "LIMOUSINE", "AIR", "MINE", "BUG", "DOG", "CHAIR", "CRANE", "LUCK", "ENGINE",  "NEEDLE"
 ]
 
 # Teams' words (for simplicity, not used in clue generation/guessing logic here)
-team_red_words =  ["WAKE", "PAPER", "BOX", "BATTERY", "STOCK", "CIRCLE", "HOOD", "SOLDIER"]
-team_blue_words = ["HORN", "KETCHUP", "LOCK", "DANCE", "SKYSCRAPER", "PYRAMID", "PRESS", "TABLE"]
-neutral_words = ["SOUL", "COMIC", "LITTER", "SINK", "PARK", "HELICOPTER", "HEAD", "TRIP"]
-assassin_word = ["PLATE"] 
 
+team_red_words =  ["DRAGON", "GREEN", "NURSE", "PLATYPUS", "CONDUCTOR", "CASINO", "SATURN", "BOARD"]
+team_blue_words = ["BUFFALO", "LIMOUSINE", "BAR", "CHOCOLATE", "PITCH", "SUIT", "NEEDLE", "RING"]
+neutral_words = ["AIR", "MINE", "BUG", "DOG", "CHAIR", "CRANE", "LUCK", "ENGINE"]
+assassin_word =  ["HOLLYWOOD"]
 
-def generate_clue(board_words, team_words, assassin):
+def generate_clue(team_red_words, team_blue_words, neutral_words, assassin_word):
     # clue only
     prompt = f"""
-    These are your team's words: {team_red_words} 
-    These are the opponent's words: {team_blue_words}
-    These are the neutral words: {neutral_words}
-    This is the instant death word: {assassin_word}
-    Search the synonym of each word in your team words list. Then get the relationship word that describes the most words based on their synonyms.
-    The relationship word should not be in the provided list and should be specific enough to guess the exact words that are related from the list. The relationship word must not be related to other words than your team's word list.The relationship word must be one word and not related to {assassin}. Give the relationship word and number of the related words. Output(relationship_word, number) in tuple format. Your response must be 1 line: one tuple."
+    From your list,{team_red_words}, give me a clue that represents some of the words from the list in some way. 
+    For example, for the word cards ‘beach’, ‘whale’, and ‘water’, one could give the clue ‘ocean’, as these things are all related to the ocean. 
+    Also, give me a number that represents how many words match that clue. The single word clue must be related by meaning, so it cannot be purely phonetically related.
+    Avoid a clue that may relate to this words: {team_blue_words}.
+    Avoid a clue that relates to this words: {assassin_word}.
+    The clue word must not be from the list. 
+    Output(relationship_word, number) in tuple format. 
+    Your response must be 1 line: one tuple.
     """
 
     response = client.chat.completions.create(
@@ -77,7 +79,7 @@ def response_format(raw):
 
 
 def match(all_words, team_words, assassin_word):
-    spymaster = generate_clue(all_words, team_words, assassin_word)
+    spymaster = generate_clue(team_red_words, team_blue_words, neutral_words, assassin_word)
     # spymaster = random.choice(spymaster_output)
     # print(spymaster)
     try:
@@ -123,7 +125,7 @@ def validation(all_words, team_words, clue, answer, guess):
     return True
 
 
-def main():
+def gpt_vs_gpt():
     matches = 1
     correct = 0
     partial_correct = 0
@@ -167,8 +169,48 @@ def main():
     print(f"Incorrect: {incorrect}")
     print(f"Error: {error}")
 
+def gpt_vs_user():
+    """
+    gpt gives clue, guess in the input
+    """
+    matches = 1
+    correct = 0
+    incorrect = 0
+    
 
-# main()
-for _ in range(30):
-    print(generate_clue(all_words, team_red_words, assassin_word))
-    print()
+    while team_red_words:
+        spymaster = generate_clue(team_red_words, team_blue_words, neutral_words, assassin_word)
+        
+        clue = response_format(spymaster)
+        clue_num = int(clue[1].strip())
+
+        print(f"Spymaster's Clue: {clue}")
+        print( "Word Board: ", all_words)
+        for _ in range(clue_num):
+            guess = input("Guess one word: ")
+            if guess.upper() in team_red_words:
+                print("correct!")
+                team_red_words.remove(guess.upper())
+                all_words.remove(guess.upper())
+                correct += 1
+            else:
+                print("incorrect")
+                incorrect += 1
+                break
+
+
+        matches += 1
+        print()
+
+    print(f"Statistics: total {matches - 1} turns")
+    print(f"Correct: {correct}")
+    print(f"Incorrect: {incorrect}")
+    # print(f"Error: {error}")
+
+
+# # main()
+# for _ in range(5):
+#     print(generate_clue(team_red_words, team_blue_words, neutral_words, assassin_word))
+#     print()
+
+gpt_vs_user() 
