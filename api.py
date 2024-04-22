@@ -1,7 +1,7 @@
-from openai import OpenAI
+from openai import OpenAI # type: ignore
 import random
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv # type: ignore
 import os
 
 # Load your API key from an environment variable
@@ -21,16 +21,16 @@ neutral_words = ["SOUL", "COMIC", "LITTER", "SINK", "PARK", "HELICOPTER", "HEAD"
 assassin_word = ["PLATE"] 
 
 
-
 def generate_clue(board_words, team_words, assassin):
     # clue only
-    prompt = f"This is the entire word list: {board_words}. This word list is your team's words: {team_words}. Give the relationship word that would describe the relationship of the 2 or more of the words on your team's list. The relationship word should not be in the provided list and should be specific enough to guess the exact words that are related from the list. The relationship word must not be related to other words than your team's word list. The relationship word must be one word and not related to {assassin}. Give the relationship word and number of the related words. Output(relationship_word, number) in tuple format. Your response must be 1 line: one tuple. No empty newline needed in between"
-   
-    # clue & answers
-    # prompt = f"This is the entire word list: {board_words}. This word list is your team's words: {team_words}. Give the relationship word that would describe the relationship of the some of the words on your team's list. The relationship word should not be in the provided list and should be specific enough to guess the exact words that are related from the list. The relationship word must not be related to other words than your team's word list. The relationship word must be one word and not related to {assassin}. Give the relationship word and number of the related words. Output(relationship_word, number) in tuple format, and related words in list format without any explanation. The relationship word cannot be from the list. Your response must be 2 lines: one tuple in first line, and one list in the other. No empty newline needed in between"
-
-    # clue & answer & explanation
-    # prompt = f"This is the entire word list: {board_words}. This word list is your team's words: {team_words}. Give the relationship word that would describe the relationship of the some of the words on your team's list. The relationship word should not be in the provided list and should be specific enough to guess the exact words that are related from the list. The relationship word must not be related to other words than your team's word list. The relationship word must be one word and not related to {assassin}. Give the relationship word and number of the related words. Output(relationship_word, number) in tuple format, and related words in list format without any explanation. The relationship word cannot be from the list. Your response must be 3 lines: one tuple in first line, and one list in the second line, and explanataion in the third line. No empty newline needed in between"
+    prompt = f"""
+    These are your team's words: {team_red_words} 
+    These are the opponent's words: {team_blue_words}
+    These are the neutral words: {neutral_words}
+    This is the instant death word: {assassin_word}
+    Search the synonym of each word in your team words list. Then get the relationship word that describes the most words based on their synonyms.
+    The relationship word should not be in the provided list and should be specific enough to guess the exact words that are related from the list. The relationship word must not be related to other words than your team's word list.The relationship word must be one word and not related to {assassin}. Give the relationship word and number of the related words. Output(relationship_word, number) in tuple format. Your response must be 1 line: one tuple."
+    """
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
