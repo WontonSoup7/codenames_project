@@ -3,9 +3,13 @@ import random
 import numpy as np
 import json 
 import sqlite3
-st.title("Codenames")
+import string
 from test_prompts import gen_clue
 from test_prompts import gen_guess
+
+
+st.title("Codenames")
+
 # RESTART GAME
 def clear_ss():
     for key in ss.keys():
@@ -13,30 +17,30 @@ def clear_ss():
 with st.columns([2, 1, 2])[1]:
     st.button("New Game", on_click=clear_ss)
 
-# conn = sqlite3.connect('codenames.db', timeout=60)
-# c = conn.cursor()
+conn = sqlite3.connect('codenames.db', timeout=60)
+c = conn.cursor()
 
-# c.execute("""
-#     CREATE TABLE IF NOT EXISTS GAME(
-#     ID INTEGER PRIMARY KEY,
-#     NUM_TURNS INT NOT NULL DEFAULT 0,
-#     BOARD_ID INTEGER,
-#     FOREIGN KEY (BOARD_ID) REFERENCES BOARD(ID) ON DELETE CASCADE
-#     )""")
-# c.execute("""
-#     CREATE TABLE IF NOT EXISTS BOARD(
-#     ID INTEGER PRIMARY KEY,
-#     WORD TEXT,
-#     TEAM TEXT, --red, blue, neutral, or assassin
-#     GUESSED BOOLEAN
-#     )""")
+c.execute("""
+    CREATE TABLE IF NOT EXISTS GAME(
+    ID TEXT PRIMARY KEY,
+    NUM_TURNS INT NOT NULL DEFAULT 0
+    )""")
+c.execute("""
+    CREATE TABLE IF NOT EXISTS WORD(
+    WORD TEXT,
+    GAME_ID TEXT,
+    TEAM TEXT,    -- 'red', 'blue', 'neutral', or 'assassin'
+    GUESSED BOOLEAN NOT NULL DEFAULT 0,
+    PRIMARY KEY (WORD, GAME_ID),
+    FOREIGN KEY (GAME_ID) REFERENCES GAME(ID) ON DELETE CASCADE
+    )""")
 
 # c.execute("INSERT INTO BOARD(WORD, TEAM, GUESSED) VALUES ('W', 'RED', '1')")
 # conn.commit()
 # c.execute("SELECT WORD FROM BOARD")
 # w = c.fetchone()
-# #st.write(w)
-# st.title(w)
+#st.write(w)
+#st.title(w)
 
 ss = st.session_state
 # Dummy api calls for testing
@@ -59,18 +63,19 @@ if 'words' not in ss:
     word_list = [word.strip() for word in word_list]
     words = random.sample(word_list, 25)
     words_dict = {}
-    card_vals = [8, 7, 9, 1]
-    ctr = 0
-    for word in words:
-        words_dict[word] = ctr
-        card_vals[ctr] -= 1
-        if not card_vals[ctr]:
-            ctr += 1
-
+    for i in range(3):
+        for j in range(8):
+            words_dict[words[8*i + j]] = i
+            #add the words to the db
+            #if (i == 0 and j == 0):
+            #    c.execute(f"INSERT INTO BOARD()")
+    words_dict[words[-1]] = 3
     random.shuffle(words)
     ss.words = words
     ss.words_dict = words_dict
     ss.curr_dict = {key:val for key, val in ss.words_dict.items()}
+
+    #st.write("WORD DICT: ", words_dict) #delete later
 
     # swap these two when all buttons need to be disabled
     ss.clicked = {word:False for word in words_dict}
@@ -85,7 +90,26 @@ if 'words' not in ss:
 
 if "error_ct" not in ss:
     ss.error_ct = 0
-st.write(ss.error_ct)
+# st.write(ss.error_ct)
+
+ss.game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+c.execute("SELECT ID FROM GAME WHERE ID = ?", (ss.game_id,))
+g = c.fetchall()
+while (g):
+    ss.game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    c.execute("SELECT ID FROM GAME WHERE ID = ?", (ss.game_id,))
+    g = c.fetchall()
+
+
+
+#add words to the db
+for key, val in ss.words_dict.items():
+    #c.execute("INSERT INTO BOARD (ID, WORD, TEAM) VALUES (?, ?, ?)", (ss.board_id, key, val))
+    c.execute("INSERT INTO WORD (WORD, GAME_ID, TEAM) VALUES(?, ?, ?)", (key, ss.game_id, val))
+    conn.commit()
+c.execute("INSERT INTO GAME(ID) VALUES(?)", (ss.game_id,))
+conn.commit()
+
 
 ss = ss
 if 'test' not in ss:
@@ -93,30 +117,6 @@ if 'test' not in ss:
 if 'cm_logs' not in ss:
     ss.cm_logs = []
     ss.gs_logs = []
-
-# GAME BOARD BUTTON CALLBACK
-def guess(name):
-    name = name.upper()
-    team = teams[ss.words_dict[name]]
-    ss.gs_logs[-1].append(name)
-    ss.gs_left -= 1
-    ss.guessed[team] -= 1
-    del ss.curr_dict[name]
-    ss.by_team[team].remove(name)
-    ss.clicked[name] = not ss.clicked[name]
-    if not ss.guessed[team] and team != "Neutral":
-        toggle_board()
-        if team == "Red":
-            st.text("YOU WIN :)")
-        else:
-            st.text("YOU LOSE :'(")
-        return True
-    elif team != "Red":
-        ss.gs_left = 0
-        return True
-
-def do_nothing(name):
-    pass
 
 
 if "game_started" not in ss:
@@ -137,11 +137,36 @@ cols_play = st.columns([.5, 1, 1, .5], gap="large")
 with cols_play[1]: cm_btn = st.button(label = "Play as CodeMaster", on_click=codemaster, disabled=ss.game_started)
 with cols_play[2]: g_btn = st.button(label = "Play as Guesser", on_click=guesser, disabled=ss.game_started)
 
+# GAME BOARD BUTTON CALLBACK
+def guess(name):
+    name = name.upper()
+    team = teams[ss.words_dict[name]]
+    ss.gs_logs[-1].append(name)
+    ss.gs_left -= 1
+    ss.guessed[team] -= 1
+    del ss.curr_dict[name]
+    ss.by_team[team].remove(name)
+    ss.clicked[name] = not ss.clicked[name]
+    if not ss.guessed[team] and team != "Neutral":
+        toggle_board()
+        if team == "Red":
+            st.text("YOU WIN :)")
+        else:
+            st.text("YOU LOSE :'(")
+        ss.curr_dict = {}
+        return True
+    elif team != "Red":
+        ss.gs_left = 0
+        return True
+
+def do_nothing(name):
+    pass
 bt_guess = do_nothing
+
 if ss.game_started:
     if ss.gs_left == 0:
         # Guesser
-        if ss.role:
+        if ss.role and ss.curr_dict:
             # FOR DEVELOPMENT ONLY
             while True:
                 try:
@@ -156,7 +181,7 @@ if ss.game_started:
                     if ss.clue_word.upper() not in ss.words:
                         print("CLUE: " + json.dumps(ss.clue))
                         break
-                    st.error_ct += 1
+                    ss.error_ct += 1
                 except Exception as e:
                     print(e)
                     pass
@@ -220,11 +245,12 @@ txt_input = st.text_input(label= "Enter Clue",
     disabled=ss.disable_user_input,
     on_change=call_guesser)
 
-if "clue" in ss:
+if "clue" in ss and ss.curr_dict:
     st.text(ss.clue_word + ": " + str(ss.clue[1])) 
     st.text("Guesses remaining: " + str(ss.gs_left))
 elif "role" in ss and not ss.role:
     st.text("Please enter a clue")
+
 # GAME BOARD
 cols = st.columns(5)
 for i in range(len(ss.words)):

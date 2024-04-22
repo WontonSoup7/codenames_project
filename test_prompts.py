@@ -27,7 +27,6 @@ assassin_word = ["Battery"] #was originally "Pitch" but that is a red team word 
 def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
     prompt = f"""
-
     Examples:
     ___
     Input:
@@ -48,8 +47,12 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     Blue words: {blue_words}
     Civilian words: {neutral_words}
     Assassin: {assassin_word}.
-    Your clue may not have appeared in any of these words.
+    The clue MUST relate to EACH words it aims to indicate.
+    Clues must be easy.
+    The clue number may not be more than the amount of red words.
+    Your clue may not have appeared in any of these words and must be one word only. 
     The clue must be in the format "Clue: Word,Number". For example "Clue: Bird,3"
+    Do not return anything else.
     """
     # THe clue must be semantically far from all the bad words, 
     # have little semantically association with the neutral words,
@@ -92,11 +95,15 @@ def gen_guess(clue, board_words):
     prompt = f"""Act as a guesser in Codenames game.
     You are given the clue: '{clue}' and the list of words on the 
     board: {board_words}.
-    Give your best guesses from {board_words} in a python array format: "[Guess1, Guess2, Guess3, etc.]". 
+    Give your best guesses from {board_words} in a python array format: 
+        "[Guess1, Guess2, Guess3, etc.]". 
     Example:
     ___
     Input: 
-    Clue: [Loud, 4], Board Words: ['BOMB', 'PORT', 'BOLT', 'CYCLE', 'BATTERY', 'DISEASE', 'MARBLE', 'CAT', 'VAN', 'BEAR', 'ROW', 'PISTOL', 'NEEDLE', 'PUMPKIN', 'BAR', 'BERLIN', 'OPERA', 'ICE', 'TAP', 'PLOT', 'RULER', 'MILLIONAIRE', 'BARK', 'BOTTLE', 'KNIGHT']
+    Clue: [Loud, 4], Board Words: ['BOMB', 'PORT', 'BOLT', 'CYCLE', 
+    'BATTERY', 'DISEASE', 'MARBLE', 'CAT', 'VAN', 'BEAR', 'ROW', 
+    'PISTOL', 'NEEDLE', 'PUMPKIN', 'BAR', 'BERLIN', 'OPERA', 'ICE', 
+    'TAP', 'PLOT', 'RULER', 'MILLIONAIRE', 'BARK', 'BOTTLE', 'KNIGHT']
     Output: 
     [BOMB, OPERA, PISTOL, BARK] 
     ___
