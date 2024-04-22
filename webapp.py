@@ -3,6 +3,7 @@ import random
 import numpy as np
 import json 
 import sqlite3
+import string
 st.title("Codenames")
 from test_prompts import gen_clue
 from test_prompts import gen_guess
@@ -18,25 +19,25 @@ c = conn.cursor()
 
 c.execute("""
     CREATE TABLE IF NOT EXISTS GAME(
-    ID INTEGER PRIMARY KEY,
-    NUM_TURNS INT NOT NULL DEFAULT 0,
-    BOARD_ID INTEGER,
-    FOREIGN KEY (BOARD_ID) REFERENCES BOARD(ID) ON DELETE CASCADE
+    ID TEXT PRIMARY KEY,
+    NUM_TURNS INT NOT NULL DEFAULT 0
     )""")
 c.execute("""
-    CREATE TABLE IF NOT EXISTS BOARD(
-    ID INTEGER PRIMARY KEY,
+    CREATE TABLE IF NOT EXISTS WORD(
     WORD TEXT,
-    TEAM TEXT, --red, blue, neutral, or assassin
-    GUESSED BOOLEAN
+    GAME_ID TEXT,
+    TEAM TEXT,    -- 'red', 'blue', 'neutral', or 'assassin'
+    GUESSED BOOLEAN NOT NULL DEFAULT 0,
+    PRIMARY KEY (WORD, GAME_ID),
+    FOREIGN KEY (GAME_ID) REFERENCES GAME(ID) ON DELETE CASCADE
     )""")
 
-c.execute("INSERT INTO BOARD(WORD, TEAM, GUESSED) VALUES ('W', 'RED', '1')")
-conn.commit()
-c.execute("SELECT WORD FROM BOARD")
-w = c.fetchone()
+# c.execute("INSERT INTO BOARD(WORD, TEAM, GUESSED) VALUES ('W', 'RED', '1')")
+# conn.commit()
+# c.execute("SELECT WORD FROM BOARD")
+# w = c.fetchone()
 #st.write(w)
-st.title(w)
+#st.title(w)
 
 ss = st.session_state
 # Dummy api calls for testing
@@ -62,10 +63,15 @@ if 'words' not in ss:
     for i in range(3):
         for j in range(8):
             words_dict[words[8*i + j]] = i
+            #add the words to the db
+            #if (i == 0 and j == 0):
+            #    c.execute(f"INSERT INTO BOARD()")
     words_dict[words[-1]] = 3
     random.shuffle(words)
     ss.words = words
     ss.words_dict = words_dict
+
+    #st.write("WORD DICT: ", words_dict) #delete later
 
     # swap these two when all buttons need to be disabled
     ss.clicked = {word:False for word in words_dict}
@@ -76,6 +82,25 @@ if 'words' not in ss:
     ss.by_team = {"Red":[], "Blue":[], "Neutral":[], "Assassin":[]}
     for key, val in ss.words_dict.items():   
         ss.by_team[teams[val]].append(key)
+
+ss.game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+c.execute("SELECT ID FROM GAME WHERE ID = ?", (ss.game_id,))
+g = c.fetchall()
+while (g):
+    ss.game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    c.execute("SELECT ID FROM GAME WHERE ID = ?", (ss.game_id,))
+    g = c.fetchall()
+
+
+
+#add words to the db
+for key, val in ss.words_dict.items():
+    #c.execute("INSERT INTO BOARD (ID, WORD, TEAM) VALUES (?, ?, ?)", (ss.board_id, key, val))
+    c.execute("INSERT INTO WORD (WORD, GAME_ID, TEAM) VALUES(?, ?, ?)", (key, ss.game_id, val))
+    conn.commit()
+c.execute("INSERT INTO GAME(ID) VALUES(?)", (ss.game_id,))
+conn.commit()
+
 
 ss = ss
 if 'test' not in ss:
