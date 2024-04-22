@@ -23,7 +23,8 @@ c = conn.cursor()
 c.execute("""
     CREATE TABLE IF NOT EXISTS GAME(
     ID TEXT PRIMARY KEY,
-    NUM_TURNS INT NOT NULL DEFAULT 0
+    NUM_TURNS INT NOT NULL DEFAULT 0,
+    WIN BOOLEAN
     )""")
 c.execute("""
     CREATE TABLE IF NOT EXISTS WORD(
@@ -92,23 +93,82 @@ if "error_ct" not in ss:
     ss.error_ct = 0
 # st.write(ss.error_ct)
 
-ss.game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-c.execute("SELECT ID FROM GAME WHERE ID = ?", (ss.game_id,))
-g = c.fetchall()
-while (g):
-    ss.game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-    c.execute("SELECT ID FROM GAME WHERE ID = ?", (ss.game_id,))
-    g = c.fetchall()
+    #new addition
+    ss.num_turns = 0
+
+def get_db_connection():
+    conn = sqlite3.connect('codenames.db', timeout=60)
+    return conn
+
+def insert_word(word, game_id, team, guessed=0):
+    conn = get_db_connection()
+    try:
+        with conn:
+            conn.execute("INSERT INTO WORD(WORD, GAME_ID, TEAM, GUESSED) VALUES(?, ?, ?, ?)", (word, game_id, team, guessed))
+    finally:
+        conn.close()
+
+def insert_game(game_id, num_turns=0, win=0):
+    conn = get_db_connection()
+    try:
+        with conn:
+            conn.execute("INSERT INTO GAME(ID, NUM_TURNS, WIN) VALUES(?, ?, ?)", (game_id, num_turns, win))
+    finally:
+        conn.close()
+
+def fetch_all_games():
+    conn = get_db_connection()
+    try:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM GAME")
+            results = cursor.fetchall()
+            return results
+    finally:
+        conn.close()
+
+def fetch_all_words():
+    conn = get_db_connection()
+    try:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM WORD")
+            results = cursor.fetchall()
+            return results
+    finally:
+        conn.close()
+
+def check_game_id_exists_in_db(game_id):
+    conn = get_db_connection()
+    try:
+        with conn:
+            cursor = conn.cursor()
+            # Note the comma after game_id to make it a tuple
+            cursor.execute("SELECT ID FROM GAME WHERE ID = ?", (game_id,))
+            results = cursor.fetchall()
+            return results
+    finally:
+        conn.close()
+
+def generate_unique_game_id():
+    new_game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    while check_game_id_exists_in_db(new_game_id):
+        new_game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    return new_game_id
+
+# Use this function to set ss.game_id when needed, not at the top level of your script
+if 'game_id' not in ss:
+    ss.game_id = generate_unique_game_id()
 
 
 
-#add words to the db
-for key, val in ss.words_dict.items():
-    #c.execute("INSERT INTO BOARD (ID, WORD, TEAM) VALUES (?, ?, ?)", (ss.board_id, key, val))
-    c.execute("INSERT INTO WORD (WORD, GAME_ID, TEAM) VALUES(?, ?, ?)", (key, ss.game_id, val))
-    conn.commit()
-c.execute("INSERT INTO GAME(ID) VALUES(?)", (ss.game_id,))
-conn.commit()
+# #add words to the db
+# for key, val in ss.words_dict.items():
+#     #c.execute("INSERT INTO BOARD (ID, WORD, TEAM) VALUES (?, ?, ?)", (ss.board_id, key, val))
+#     c.execute("INSERT INTO WORD (WORD, GAME_ID, TEAM) VALUES(?, ?, ?)", (key, ss.game_id, val))
+#     conn.commit()
+# c.execute("INSERT INTO GAME(ID) VALUES(?)", (ss.game_id,))
+# conn.commit()
 
 
 ss = ss
@@ -117,6 +177,56 @@ if 'test' not in ss:
 if 'cm_logs' not in ss:
     ss.cm_logs = []
     ss.gs_logs = []
+
+
+
+# GAME BOARD BUTTON CALLBACK
+def guess(name):
+    team = teams[ss.words_dict[name]]
+    ss.gs_logs[-1].append(name)
+    ss.gs_left -= 1
+    ss.guessed[team] -= 1
+    ss.by_team[team].remove(name)
+    if not ss.guessed[team] and team != "Neutral":
+        toggle_board()
+        for key, val in ss.words_dict.items():
+            tm = teams[val]
+            if (key not in ss.by_team[tm]): #word has been guessed
+                #c.execute("INSERT INTO WORD(WORD, GAME_ID, TEAM, GUESSED) VALUES(?, ?, ?, ?)", (key, ss.game_id, tm, 1)) 
+                insert_word(key, ss.game_id, tm, 1)
+            else: #word was not guessed, the value for the guessed column is 0 by default
+                #c.execute("INSERT INTO WORD(WORD, GAME_ID, TEAM) VALUES(?, ?, ?)", (key, ss.game_id, tm))
+                insert_word(key, ss.game_id, tm)
+        #conn.commit()
+        if team == "Red":
+            st.text("YOU WIN :)")
+            #c.execute("INSERT INTO GAME(ID, WIN) VALUES(?, ?)", (ss.game_id, 1))
+            insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=1)
+        else:
+            st.text("YOU LOSE :'(")
+            #c.execute("INSERT INTO GAME(ID, WIN) VALUES(?, ?)", (ss.game_id, 0))
+            insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=0)
+    
+
+        #JUST for test purposeses- delete these next lines (after this comment and before return) later
+        #c.execute("SELECT * FROM GAME")
+        #game_data = c.fetchall()
+        game_data = fetch_all_games()
+        st.text(game_data)
+        #c.execute("SELECT * FROM WORD")
+        #word_data = c.fetchall()
+        word_data = fetch_all_words()
+        st.text(word_data)
+
+        return
+    elif team != "Red":
+        ss.gs_left = 0
+        ss.num_turns += 1 #increment number of turns after incorrect guess
+
+    ss.clicked[name] = not ss.clicked[name]
+
+def do_nothing(name):
+    pass
 
 
 if "game_started" not in ss:
