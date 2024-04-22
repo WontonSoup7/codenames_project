@@ -65,17 +65,17 @@ def guess(name):
     ss.gs_left -= 1
     ss.guessed[team] -= 1
     ss.by_team[team].remove(name)
+    ss.clicked[name] = not ss.clicked[name]
     if not ss.guessed[team] and team != "Neutral":
         toggle_board()
         if team == "Red":
             st.text("YOU WIN :)")
         else:
             st.text("YOU LOSE :'(")
-        return
+        return True
     elif team != "Red":
         ss.gs_left = 0
-
-    ss.clicked[name] = not ss.clicked[name]
+        return True
 
 def do_nothing(name):
     pass
@@ -109,6 +109,7 @@ if ss.game_started:
                 try:
                     ss.clue = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
+                    print(ss.clue)
                     # st.text(ss.clue)
                     ss.clue = ss.clue.split(":")
                     ss.clue_word, ss.gs_left = ss.clue[0], int(ss.clue[1])
@@ -149,11 +150,14 @@ def call_guesser():
         try:
             parse_clue()
             ss.gs_array = json.loads(gen_guess(json.dumps(ss.clue), ss.words))
-            for gs in ss.gs_array:
-                guess(gs)
             break
-        except:
+        except: 
+            st.write("Clue Given in Incorrect Format")
             ss.user_input = ""
+            ss.gs_array = []
+            break
+    for gs in ss.gs_array:
+        if guess(gs):
             break
 
 txt_input = st.text_input(label= "Enter Clue",
@@ -189,3 +193,8 @@ for i in range(len(ss.cm_logs)):
     st.text(ss.cm_logs[i])
     st.text("Guesses: ")
     st.text(ss.gs_logs[i])
+
+if not ss.game_started and len(ss.cm_logs):
+    ss.write("Total turns: ", len(ss.cm_logs))
+    for team in ss.by_team.keys():
+        ss.write(team + " words guessed: " + str(len(ss.by_team[team])))
