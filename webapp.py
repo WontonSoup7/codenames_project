@@ -205,7 +205,7 @@ if ss.game_started:
             # FOR DEVELOPMENT ONLY
             while True:
                 try:
-                    ss.clue = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
+                    ss.clue, _ = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
                     print(ss.clue)
                     ss.clue = ss.clue.split(": ")
@@ -254,7 +254,7 @@ def call_guesser():
         print(ss.curr_dict.keys())
         while True: 
             try:
-                ss.gs_array = gen_guess(clue=ss.clue, board_words = json.dumps([key for key in ss.curr_dict.keys()]))
+                ss.gs_array, _ = gen_guess(clue=ss.clue, board_words = json.dumps([key for key in ss.curr_dict.keys()]))
                 ss.gs_array = json.loads(ss.gs_array)
                 for gs in ss.gs_array:
                     print("guess: " + gs)
