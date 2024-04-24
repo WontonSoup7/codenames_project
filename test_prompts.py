@@ -24,9 +24,12 @@ team_blue_words = ["King", "Pan", "Square", "Press", "Seal", "Bear", "Spike", "C
 neutral_words = ["Palm", "Crane", "Rock", "Stick", "Tag", "Disease", "Yard"]
 assassin_word = ["Battery"] #was originally "Pitch" but that is a red team word so i wanted it to be different
 
+def create_prompt(template, replacements):  
+    return template.format(**replacements)
+
 def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
-    prompt = f"""
+    prompt = """
     Examples:
     ___
     Input:
@@ -77,6 +80,15 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     # The clue must be in the format "Word:Number". For example "Bird: 3"
     # Do not return aynthing else."""
 
+    replacements = {
+        'red_words' : red_words,
+        'blue_words' : blue_words,
+        'neutral_words' : neutral_words,
+        'assassin_word' : assassin_word
+    }
+
+    old_prompt = prompt
+    prompt = create_prompt(prompt, replacements)
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
@@ -89,10 +101,10 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     )
 
     clue = response.choices[0].message.content
-    return clue
+    return clue, old_prompt
 
 def gen_guess(clue, board_words):
-    prompt = f"""Act as a guesser in Codenames game.
+    prompt = """Act as a guesser in Codenames game.
     You are given the clue: '{clue}' and the list of words on the 
     board: {board_words}.
     Give your best guesses from {board_words} in a python array format: 
@@ -113,6 +125,14 @@ def gen_guess(clue, board_words):
     The number of guesses must match the number provided in the clue.
     Do not return anything else besides your array of guesses."""
 
+    replacements = {
+        'clue' : clue,
+        'board_words' : board_words
+    }
+
+    old_prompt = prompt
+    prompt = create_prompt(prompt, replacements)
+
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
         messages=[
@@ -124,7 +144,7 @@ def gen_guess(clue, board_words):
     )
 
     guess = response.choices[0].message.content
-    return guess
+    return guess, old_prompt
 
 
 
@@ -133,8 +153,12 @@ if __name__ == "__main__":
     #selected_words = random.choice(board_words)
 
     #clue = generate_clue(selected_words)
-    clue = gen_guess(team_red_words, team_blue_words, neutral_words, assassin_word)
+    #clue, _ = gen_guess(team_red_words, team_blue_words, neutral_words, assassin_word)
+    clue, _ = gen_clue(team_red_words, team_blue_words, neutral_words, assassin_word)
     print(f"Spymaster's Clue: {clue}")
-    
-    guess = gen_clue(clue, board_words)
+    print(_)
+
+    #guess, _ = gen_clue(clue, board_words)
+    guess, _ = gen_guess(clue, board_words)
     print(f"Guesser's Guess: {guess}")
+    print(_)

@@ -20,46 +20,7 @@ with st.columns([2, 1, 2])[1]:
 conn = sqlite3.connect('codenames.db', timeout=60)
 c = conn.cursor()
 
-c.execute("""
-    CREATE TABLE IF NOT EXISTS GAME(
-    ID TEXT PRIMARY KEY,
-    NUM_TURNS INT NOT NULL DEFAULT 0,
-    WIN BOOLEAN
-    )""")
-c.execute("""
-    CREATE TABLE IF NOT EXISTS WORD(
-    WORD TEXT,
-    GAME_ID TEXT,
-    TEAM TEXT,    -- 'red', 'blue', 'neutral', or 'assassin'
-    GUESSED BOOLEAN NOT NULL DEFAULT 0,
-    PRIMARY KEY (WORD, GAME_ID),
-    FOREIGN KEY (GAME_ID) REFERENCES GAME(ID) ON DELETE CASCADE
-    )""")
-c.execute("""
-    CREATE TABLE IF NOT EXISTS TURN(
-        ID INTEGER PRIMARY KEY,
-        RED_WORDS TEXT,
-        BLUE_WORDS TEXT,
-        NEUTRAL_WORDS TEXT,
-        ASSASSIN_WORDS TEXT,
-        CLUE_NUM INT,
-        CLUE_WORD TEXT,
-        CLUE_GUESSES TEXT,
-        NUM_CORRECT INT,
-        CORRECT_CLUE_NUM_RATIO REAL
-    )
-""")
-c.execute("""
-    CREATE TABLE IF NOT EXISTS PROMPT(
-        ID INTEGER PRIMARY KEY,
-        CM_PROMPT TEXT,
-        GUESSER_PROMPT TEXT,
-        GAMES TEXT,
-        WINS INT,
-        LOSSES INT,
-        WL_RATIO REAL
-    )
-""")
+create_tables()
 
 ss = st.session_state
 # Dummy api calls for testing
