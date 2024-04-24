@@ -6,7 +6,7 @@ import sqlite3
 import string
 from test_prompts import gen_clue
 from test_prompts import gen_guess
-
+from db_functions import *
 
 st.title("Codenames")
 
@@ -35,13 +35,31 @@ c.execute("""
     PRIMARY KEY (WORD, GAME_ID),
     FOREIGN KEY (GAME_ID) REFERENCES GAME(ID) ON DELETE CASCADE
     )""")
-
-# c.execute("INSERT INTO BOARD(WORD, TEAM, GUESSED) VALUES ('W', 'RED', '1')")
-# conn.commit()
-# c.execute("SELECT WORD FROM BOARD")
-# w = c.fetchone()
-#st.write(w)
-#st.title(w)
+c.execute("""
+    CREATE TABLE IF NOT EXISTS TURN(
+        ID INTEGER PRIMARY KEY,
+        RED_WORDS TEXT,
+        BLUE_WORDS TEXT,
+        NEUTRAL_WORDS TEXT,
+        ASSASSIN_WORDS TEXT,
+        CLUE_NUM INT,
+        CLUE_WORD TEXT,
+        CLUE_GUESSES TEXT,
+        NUM_CORRECT INT,
+        CORRECT_CLUE_NUM_RATIO REAL
+    )
+""")
+c.execute("""
+    CREATE TABLE IF NOT EXISTS PROMPT(
+        ID INTEGER PRIMARY KEY,
+        CM_PROMPT TEXT,
+        GUESSER_PROMPT TEXT,
+        GAMES TEXT,
+        WINS INT,
+        LOSSES INT,
+        WL_RATIO REAL
+    )
+""")
 
 ss = st.session_state
 # Dummy api calls for testing
@@ -95,60 +113,6 @@ if "error_ct" not in ss:
 
     #new addition
     ss.num_turns = 0
-
-def get_db_connection():
-    conn = sqlite3.connect('codenames.db', timeout=60)
-    return conn
-
-def insert_word(word, game_id, team, guessed=0):
-    conn = get_db_connection()
-    try:
-        with conn:
-            conn.execute("INSERT INTO WORD(WORD, GAME_ID, TEAM, GUESSED) VALUES(?, ?, ?, ?)", (word, game_id, team, guessed))
-    finally:
-        conn.close()
-
-def insert_game(game_id, num_turns=0, win=0):
-    conn = get_db_connection()
-    try:
-        with conn:
-            conn.execute("INSERT INTO GAME(ID, NUM_TURNS, WIN) VALUES(?, ?, ?)", (game_id, num_turns, win))
-    finally:
-        conn.close()
-
-def fetch_all_games():
-    conn = get_db_connection()
-    try:
-        with conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM GAME")
-            results = cursor.fetchall()
-            return results
-    finally:
-        conn.close()
-
-def fetch_all_words():
-    conn = get_db_connection()
-    try:
-        with conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM WORD")
-            results = cursor.fetchall()
-            return results
-    finally:
-        conn.close()
-
-def check_game_id_exists_in_db(game_id):
-    conn = get_db_connection()
-    try:
-        with conn:
-            cursor = conn.cursor()
-            # Note the comma after game_id to make it a tuple
-            cursor.execute("SELECT ID FROM GAME WHERE ID = ?", (game_id,))
-            results = cursor.fetchall()
-            return results
-    finally:
-        conn.close()
 
 def generate_unique_game_id():
     new_game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
