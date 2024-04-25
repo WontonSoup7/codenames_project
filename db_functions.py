@@ -34,8 +34,8 @@ def create_tables():
                 CLUE_NUM INT,
                 CLUE_WORD TEXT,
                 CLUE_GUESSES TEXT,
-                NUM_CORRECT INT,
-                CORRECT_CLUE_NUM_RATIO REAL
+                NUM_CORRECT INT NOT NULL DEFAULT 0,
+                CORRECT_CLUE_NUM_RATIO REAL NOT NULL DEFAULT 0
                 )
             """)
             c.execute("""
@@ -93,6 +93,47 @@ def update_prompt_after_loss(game_id):
             SET LOSSES = LOSSES + 1
             WHERE ID = ?
         """, (game_id, ))
+        conn.commit()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        conn.close()
+
+
+def get_prompt_id(guesser, prompt_text):
+    #select and return the prompt id for a guesser prompt if guesser = True (otherwise return id for CM prompt)
+    conn = get_db_connection()
+    c = conn.cursor()
+    try:
+        if guesser:
+            c.execute("""SELECT ID FROM PROMPT WHERE GUESSER_PROMPT = ?""", (prompt_text,))
+        else:
+            c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ?""", (prompt_text,))
+        id = c.fetchone()
+        return id
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        conn.close()
+
+def update_turn_trigger():
+    #create a trigger so that the correct clue num ratio gets recalculated after an update of num_correct on turn
+    conn = get_db_connection()
+    #...
+
+def update_turn_after_guess(prompt_id, updated_clue_guesses, correct):
+    conn = get_db_connection()
+    #correct is whether the guess was correct or not
+    #updated_clue_guesses is the updated array of clue guesses (as a string)
+    try:
+        if correct:
+            conn.execute("""
+            UPDATE TURN
+            SET CLUE GUESSES = ?, NUM_CORRECT = NUM_CORRECT + 1
+            WHERE PROMPT_ID = ?
+            """, (prompt_id, updated_clue_guesses))
+        else:
+            conn.execute("""""")
         conn.commit()
     except Exception as e:
         print(f"An error occurred: {e}")
