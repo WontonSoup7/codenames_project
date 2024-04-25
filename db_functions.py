@@ -119,7 +119,25 @@ def get_prompt_id(guesser, prompt_text):
 def update_turn_trigger():
     #create a trigger so that the correct clue num ratio gets recalculated after an update of num_correct on turn
     conn = get_db_connection()
-    #...
+    try:
+        conn.execute("""
+            CREATE TRIGGER IF NOT EXISTS update_correct_clue_num_ratio
+            AFTER UPDATE OF NUM_CORRECT, CLUE_NUM ON TURN
+            BEGIN
+                UPDATE TURN
+                SET CORRECT_CLUE_NUM_RATIO = CASE
+                    WHEN NEW.CLUE_NUM > 0 THEN CAST(NEW.NUM_CORRECT AS REAL) / NEW.CLUE_NUM
+                    ELSE 0
+                END
+                WHERE ID = NEW.ID;
+            END;
+        """)
+        conn.commit()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        conn.close()
+    
 
 def update_turn_after_guess(prompt_id, updated_clue_guesses, correct):
     conn = get_db_connection()
