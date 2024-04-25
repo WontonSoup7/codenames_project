@@ -44,12 +44,58 @@ def create_tables():
                 CM_PROMPT TEXT,
                 GUESSER_PROMPT TEXT,
                 GAMES TEXT,
-                WINS INT,
-                LOSSES INT,
+                WINS INT NOT NULL DEFAULT 0,
+                LOSSES INT NOT NULL DEFAULT 0,
                 WL_RATIO REAL
                 )
             """)
             conn.commit()
+    finally:
+        conn.close()
+
+
+def add_prompt_wl_ratio_trigger():
+    conn = get_db_connection()
+    try:
+        conn.execute("""
+            CREATE TRIGGER update_wl_ratio AFTER UPDATE OF WINS, LOSSES ON PROMPT
+            BEGIN
+                UPDATE PROMPT
+                SET WL_RATIO = CASE
+                    WHEN NEW.LOSSES > 0 THEN CAST(NEW.WINS AS REAL) / NEW.LOSSES
+                    ELSE NULL
+                END
+            WHERE ID = NEW.ID;
+        END;          
+    """)
+    finally:
+        conn.close()
+
+def update_prompt_after_win(game_id):
+    conn = get_db_connection()
+    try:
+        conn.execute("""
+            UPDATE PROMPT
+            SET WINS = WINS + 1
+            WHERE ID = ?
+        """, (game_id, ))
+        conn.commit()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        conn.close()
+
+def update_prompt_after_loss(game_id):
+    conn = get_db_connection()
+    try:
+        conn.execute("""
+            UPDATE PROMPT
+            SET LOSSES = LOSSES + 1
+            WHERE ID = ?
+        """, (game_id, ))
+        conn.commit()
+    except Exception as e:
+        print(f"An error occurred: {e}")
     finally:
         conn.close()
 
