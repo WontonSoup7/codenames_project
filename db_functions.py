@@ -1,4 +1,5 @@
 import sqlite3
+import json
 
 def get_db_connection():
     conn = sqlite3.connect('codenames.db', timeout=60)
@@ -71,33 +72,52 @@ def add_prompt_wl_ratio_trigger():
     finally:
         conn.close()
 
-def update_prompt_after_win(game_id):
+def update_prompt_after_win_loss(game_id, win=True):
     conn = get_db_connection()
     try:
-        conn.execute("""
+
+        c = conn.cursor()
+        c.execute("""SELECT GAMES FROM PROMPT WHERE ID = ?""", (game_id,))
+        row = c.fetchone()
+        current_games = json.loads(row[0]) if row and row[0] else []
+        current_games.append(game_id)
+        updated_games = json.dumps(current_games)
+
+        if(win):
+            conn.execute("""
             UPDATE PROMPT
-            SET WINS = WINS + 1
+            SET WINS = WINS + 1,
+                GAMES = ?
             WHERE ID = ?
-        """, (game_id, ))
-        conn.commit()
+            """, (updated_games, game_id))
+            conn.commit()
+        else:
+            conn.execute("""
+            UPDATE PROMPT
+            SET LOSSES = LOSSES + 1,
+                GAMES = ?
+            WHERE ID = ?
+            """, (updated_games, game_id))
+            conn.commit()
+        
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
         conn.close()
 
-def update_prompt_after_loss(game_id):
-    conn = get_db_connection()
-    try:
-        conn.execute("""
-            UPDATE PROMPT
-            SET LOSSES = LOSSES + 1
-            WHERE ID = ?
-        """, (game_id, ))
-        conn.commit()
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    finally:
-        conn.close()
+# def update_prompt_after_loss(game_id):
+#     conn = get_db_connection()
+#     try:
+#         conn.execute("""
+#             UPDATE PROMPT
+#             SET LOSSES = LOSSES + 1
+#             WHERE ID = ?
+#         """, (game_id, ))
+#         conn.commit()
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+#     finally:
+#         conn.close()
 
 
 def get_prompt_id(guesser, prompt_text):
@@ -228,10 +248,31 @@ def check_game_id_exists_in_db(game_id):
     finally:
         conn.close()
 
-def insert_prompt(game_id, prompt):
+def get_prompt_id(prompt_text, guesser):
+    #if guesser = 1, check if the prompt text exists in the guesser column, else check if it exists in the cm column
     conn = get_db_connection()
+    #if guesser = 1, insert as guesser prompt, otherwise insert as cm prompt
     try:
         with conn:
-            conn.execute("INSERT INTO PROMPT(GAME_ID, PROMPT) VALUES(?, ?)", (game_id, prompt))
+            c = conn.cursor()
+            p = None
+            if guesser:
+                c.execute("""SELECT ID FROM PROMPT WHERE GUESSER_PROMPT = ?""", (prompt_text, ))
+            else:
+                c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ?""", (prompt_text, ))
+            return p # will return None if the prompt does not exist in the table
     finally:
         conn.close()
+
+def insert_prompt(game_id, prompt, guesser):
+    conn = get_db_connection()
+    #if guesser = 1, insert as guesser prompt, otherwise insert as cm prompt
+    try:
+        with conn:
+            if guesser:
+                conn.execute("INSERT INTO PROMPT(GAME_ID, GUESSER_PROMPT) VALUES(?, ?)", (game_id, prompt))
+            else:
+                conn.execute("INSERT INTO PROMPT(GAME_ID, CM_PROMPT) VALUES(?, ?)", (game_id, prompt))
+    finally:
+        conn.close()
+
