@@ -127,10 +127,24 @@ def guess(name):
             st.text("YOU WIN :)")
             #c.execute("INSERT INTO GAME(ID, WIN) VALUES(?, ?)", (ss.game_id, 1))
             insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=1)
+
+            #update prompt table
+            if (ss.role == 1): #guesser
+                prompt_id = get_prompt_id(ss.guesser_prompt, guesser=True)
+            else:
+                prompt_id = get_prompt_id(ss.cm_prompt, guesser=False)
+            update_prompt_after_win_loss(prompt_id, ss.game_id, True)
         else:
             st.text("YOU LOSE :'(")
             #c.execute("INSERT INTO GAME(ID, WIN) VALUES(?, ?)", (ss.game_id, 0))
             insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=0)
+
+            #update prompt table
+            if (ss.role == 1): #guesser
+                prompt_id = get_prompt_id(ss.guesser_prompt, guesser=True)
+            else:
+                prompt_id = get_prompt_id(ss.cm_prompt, guesser=False)
+            update_prompt_after_win_loss(prompt_id, ss.game_id, False)
     
 
         #JUST for test purposeses- delete these next lines (after this comment and before return) later

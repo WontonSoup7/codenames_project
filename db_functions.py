@@ -72,12 +72,12 @@ def add_prompt_wl_ratio_trigger():
     finally:
         conn.close()
 
-def update_prompt_after_win_loss(game_id, win=True):
+def update_prompt_after_win_loss(prompt_id, game_id, win=True):
     conn = get_db_connection()
     try:
 
         c = conn.cursor()
-        c.execute("""SELECT GAMES FROM PROMPT WHERE ID = ?""", (game_id,))
+        c.execute("""SELECT GAMES FROM PROMPT WHERE ID = ?""", (prompt_id,))
         row = c.fetchone()
         current_games = json.loads(row[0]) if row and row[0] else []
         current_games.append(game_id)
@@ -89,7 +89,7 @@ def update_prompt_after_win_loss(game_id, win=True):
             SET WINS = WINS + 1,
                 GAMES = ?
             WHERE ID = ?
-            """, (updated_games, game_id))
+            """, (updated_games, prompt_id))
             conn.commit()
         else:
             conn.execute("""
@@ -97,7 +97,7 @@ def update_prompt_after_win_loss(game_id, win=True):
             SET LOSSES = LOSSES + 1,
                 GAMES = ?
             WHERE ID = ?
-            """, (updated_games, game_id))
+            """, (updated_games, prompt_id))
             conn.commit()
         
     except Exception as e:
@@ -120,7 +120,7 @@ def update_prompt_after_win_loss(game_id, win=True):
 #         conn.close()
 
 
-def get_prompt_id(guesser, prompt_text):
+def get_prompt_id(prompt_text, guesser=True):
     #select and return the prompt id for a guesser prompt if guesser = True (otherwise return id for CM prompt)
     conn = get_db_connection()
     c = conn.cursor()
