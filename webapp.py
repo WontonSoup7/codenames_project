@@ -221,11 +221,13 @@ if ss.game_started:
                 try:
                     ss.clue, ss.cm_prompt = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
+                    insert_prompt(ss.game_id, ss.cm_prompt, False)
                     print(ss.clue)
                     ss.clue = ss.clue.split(": ")
                     ss.clue = ss.clue[1].split(", ")
                     ss.clue[1] = int(ss.clue[1])
                     ss.clue_word, ss.gs_left = ss.clue
+
                     # st.text(ss.clue)
                     if ss.clue_word.upper() not in ss.words:
                         print("CLUE: " + json.dumps(ss.clue))
@@ -269,6 +271,7 @@ def call_guesser():
         while True: 
             try:
                 ss.gs_array, ss.guesser_prompt = gen_guess(clue=ss.clue, board_words = json.dumps([key for key in ss.curr_dict.keys()]))
+                insert_prompt(ss.game_id, ss.guesser_prompt, True)
                 ss.gs_array = json.loads(ss.gs_array)
                 for gs in ss.gs_array:
                     print("guess: " + gs)

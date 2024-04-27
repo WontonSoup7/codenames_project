@@ -270,11 +270,11 @@ def insert_prompt(game_id, prompt, guesser):
     try:
         with conn:
             if guesser:
-                if (get_prompt_id(prompt)==None): #if prompt doesn't already exist in db
-                    conn.execute("INSERT INTO PROMPT(GAME_ID, GUESSER_PROMPT) VALUES(?, ?)", (game_id, prompt))
+                if (get_prompt_id(prompt, guesser)==None): #if prompt doesn't already exist in db
+                    conn.execute("INSERT INTO PROMPT(GAMES, GUESSER_PROMPT) VALUES(?, ?)", (game_id, prompt))
             else:
-                if (get_prompt_id(prompt)==None):
-                    conn.execute("INSERT INTO PROMPT(GAME_ID, CM_PROMPT) VALUES(?, ?)", (game_id, prompt))
+                if (get_prompt_id(prompt, guesser)==None):
+                    conn.execute("INSERT INTO PROMPT(GAMES, CM_PROMPT) VALUES(?, ?)", (game_id, prompt))
     finally:
         conn.close()
 
