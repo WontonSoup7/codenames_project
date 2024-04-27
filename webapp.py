@@ -86,16 +86,6 @@ if 'game_id' not in ss:
     ss.game_id = generate_unique_game_id()
 
 
-
-# #add words to the db
-# for key, val in ss.words_dict.items():
-#     #c.execute("INSERT INTO BOARD (ID, WORD, TEAM) VALUES (?, ?, ?)", (ss.board_id, key, val))
-#     c.execute("INSERT INTO WORD (WORD, GAME_ID, TEAM) VALUES(?, ?, ?)", (key, ss.game_id, val))
-#     conn.commit()
-# c.execute("INSERT INTO GAME(ID) VALUES(?)", (ss.game_id,))
-# conn.commit()
-
-
 ss = ss
 if 'test' not in ss:
     ss.test = [] 
@@ -103,13 +93,13 @@ if 'cm_logs' not in ss:
     ss.cm_logs = []
     ss.gs_logs = []
 
-
-
 # GAME BOARD BUTTON CALLBACK
 def guess(name):
+    name = name.upper()
     team = teams[ss.words_dict[name]]
     ss.gs_logs[-1].append(name)
     ss.gs_left -= 1
+    del ss.curr_dict[name]
     ss.guessed[team] -= 1
     ss.by_team[team].remove(name)
     if not ss.guessed[team] and team != "Neutral":
@@ -156,12 +146,12 @@ def guess(name):
         #word_data = c.fetchall()
         word_data = fetch_all_words()
         st.text(word_data)
-
-        return
+        ss.curr_dict = {}
+        return True
     elif team != "Red":
         ss.gs_left = 0
         ss.num_turns += 1 #increment number of turns after incorrect guess
-
+        return True
     ss.clicked[name] = not ss.clicked[name]
 
 def do_nothing(name):
@@ -186,27 +176,6 @@ cols_play = st.columns([.5, 1, 1, .5], gap="large")
 with cols_play[1]: cm_btn = st.button(label = "Play as CodeMaster", on_click=codemaster, disabled=ss.game_started)
 with cols_play[2]: g_btn = st.button(label = "Play as Guesser", on_click=guesser, disabled=ss.game_started)
 
-# GAME BOARD BUTTON CALLBACK
-def guess(name):
-    name = name.upper()
-    team = teams[ss.words_dict[name]]
-    ss.gs_logs[-1].append(name)
-    ss.gs_left -= 1
-    ss.guessed[team] -= 1
-    del ss.curr_dict[name]
-    ss.by_team[team].remove(name)
-    ss.clicked[name] = not ss.clicked[name]
-    if not ss.guessed[team] and team != "Neutral":
-        toggle_board()
-        if team == "Red":
-            st.text("YOU WIN :)")
-        else:
-            st.text("YOU LOSE :'(")
-        ss.curr_dict = {}
-        return True
-    elif team != "Red":
-        ss.gs_left = 0
-        return True
 
 def do_nothing(name):
     pass
