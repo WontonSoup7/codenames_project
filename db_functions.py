@@ -28,6 +28,7 @@ def create_tables():
             c.execute("""
                 CREATE TABLE IF NOT EXISTS TURN(
                 ID INTEGER PRIMARY KEY,
+                GAME_ID TEXT,
                 RED_WORDS TEXT,
                 BLUE_WORDS TEXT,
                 NEUTRAL_WORDS TEXT,
@@ -159,19 +160,36 @@ def update_turn_trigger():
         conn.close()
     
 
-def update_turn_after_guess(prompt_id, updated_clue_guesses, correct):
+def update_turn_after_guess(prompt_id, guess, correct):
     conn = get_db_connection()
     #correct is whether the guess was correct or not
     #updated_clue_guesses is the updated array of clue guesses (as a string)
     try:
+        c = conn.cursor()
+
+        c.execute("""SELECT MAX(ID) FROM TURN""")
+        row = c.fetchone()
+        current_turn = row[0]
+
+        c.execute("""SELECT CLUE_GUESSES FROM TURN WHERE ID = ?""", (current_turn,))
+        row = c.fetchone()
+        updated_clue_guesses = json.loads(row[0]) if row and row[0] else []
+        updated_clue_guesses.append(guess)
+        updated_clue_guesses = json.dumps(updated_clue_guesses)
+
         if correct:
             conn.execute("""
             UPDATE TURN
-            SET CLUE GUESSES = ?, NUM_CORRECT = NUM_CORRECT + 1
-            WHERE PROMPT_ID = ?
-            """, (prompt_id, updated_clue_guesses))
+            SET CLUE_GUESSES = ?, NUM_CORRECT = NUM_CORRECT + 1
+            WHERE ID = ?
+            """, (current_turn, updated_clue_guesses))
         else:
-            conn.execute("""""")
+            #don't incrememnt num_correct because the guess was incorrect
+            conn.execute("""
+            UPDATE TURN
+            SET CLUE_GUESSES = ?
+            WHERE ID = ?
+            """, (current_turn, updated_clue_guesses))
         conn.commit()
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -275,6 +293,16 @@ def insert_prompt(game_id, prompt, guesser):
             else:
                 if (get_prompt_id(prompt, guesser)==None):
                     conn.execute("INSERT INTO PROMPT(GAMES, CM_PROMPT) VALUES(?, ?)", (game_id, prompt))
+    finally:
+        conn.close()
+
+def insert_turn(game_id, red_words, blue_words, neutral_words, assassin_words, clue_word, clue_num):
+    conn = get_db_connection()
+    try:
+        with conn:
+            conn.execute("""INSERT INTO TURN(GAME_ID, RED_WORDS, BLUE_WORDS, NEUTRAL_WORDS, ASSASSIN_WORDS, CLUE_WORD, CLUE_NUM)
+                         VALUES(?, ?, ?, ?, ?, ?)""", (game_id, red_words, blue_words, neutral_words, assassin_words, clue_word, clue_num))
+            conn.commit()
     finally:
         conn.close()
 
