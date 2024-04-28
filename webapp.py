@@ -103,6 +103,10 @@ def guess(name):
     del ss.curr_dict[name]
     ss.by_team[team].remove(name)
     ss.clicked[name] = not ss.clicked[name]
+
+    ss.num_turns += 1
+    insert_turn
+
     if not ss.guessed[team] and team != "Neutral":
         toggle_board()
         for key, val in ss.words_dict.items():
@@ -186,6 +190,7 @@ if ss.game_started:
                     pass
             print(ss.clue_word, ss.gs_left)
             ss.cm_logs.append(ss.clue)
+            insert_turn(ss.game_id, json.dumps(ss.by_team['Red']), json.dumps(ss.by_team['Blue']), json.dumps(ss.by_team['Neutral']), json.dumps(ss.by_team['Assassin']), ss.clue_word, ss.gs_left)
             ss.gs_logs.append([])
             bt_guess = guess
         # Codemaster
@@ -208,6 +213,9 @@ def parse_clue():
     ss.clue[1] = int(ss.clue[1])
     ss.clue_word, ss.gs_left = ss.clue
     ss.cm_logs.append(ss.clue)
+
+    insert_turn(ss.game_id, json.dumps(ss.by_team['Red']), json.dumps(ss.by_team['Blue']), json.dumps(ss.by_team['Neutral']), json.dumps(ss.by_team['Assassin']), ss.clue_word, ss.gs_left)
+
     ss.gs_logs.append([])
     ss.user_input = ""
 

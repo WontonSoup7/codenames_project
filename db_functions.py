@@ -301,7 +301,7 @@ def insert_turn(game_id, red_words, blue_words, neutral_words, assassin_words, c
     try:
         with conn:
             conn.execute("""INSERT INTO TURN(GAME_ID, RED_WORDS, BLUE_WORDS, NEUTRAL_WORDS, ASSASSIN_WORDS, CLUE_WORD, CLUE_NUM)
-                         VALUES(?, ?, ?, ?, ?, ?)""", (game_id, red_words, blue_words, neutral_words, assassin_words, clue_word, clue_num))
+                         VALUES(?, ?, ?, ?, ?, ?, ?)""", (game_id, red_words, blue_words, neutral_words, assassin_words, clue_word, clue_num))
             conn.commit()
     finally:
         conn.close()
