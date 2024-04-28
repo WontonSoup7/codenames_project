@@ -213,11 +213,11 @@ def insert_word(word, game_id, team, guessed=0):
     finally:
         conn.close()
 
-def insert_game(game_id, type, num_turns=0, win=0):
+def insert_game(game_id, num_turns=0, win=0):
     conn = get_db_connection()
     try:
         with conn:
-            conn.execute("INSERT INTO GAME(ID, TYPE, NUM_TURNS, WIN) VALUES(?, ?, ?, ?)", (game_id, type, num_turns, win))
+            conn.execute("INSERT INTO GAME(ID, NUM_TURNS, WIN) VALUES(?, ?, ?)", (game_id, num_turns, win))
     finally:
         conn.close()
 
