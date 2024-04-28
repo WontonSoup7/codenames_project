@@ -160,7 +160,7 @@ def update_turn_trigger():
         conn.close()
     
 
-def update_turn_after_guess(prompt_id, guess, correct):
+def update_turn_after_guess(guess, correct):
     conn = get_db_connection()
     #correct is whether the guess was correct or not
     #updated_clue_guesses is the updated array of clue guesses (as a string)

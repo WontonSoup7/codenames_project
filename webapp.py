@@ -104,8 +104,10 @@ def guess(name):
     ss.by_team[team].remove(name)
     ss.clicked[name] = not ss.clicked[name]
 
-    ss.num_turns += 1
-    insert_turn
+    if(team=='Red'):
+        update_turn_after_guess(name, True)
+    else:
+        update_turn_after_guess(name, False)
 
     if not ss.guessed[team] and team != "Neutral":
         toggle_board()
@@ -190,7 +192,10 @@ if ss.game_started:
                     pass
             print(ss.clue_word, ss.gs_left)
             ss.cm_logs.append(ss.clue)
+
             insert_turn(ss.game_id, json.dumps(ss.by_team['Red']), json.dumps(ss.by_team['Blue']), json.dumps(ss.by_team['Neutral']), json.dumps(ss.by_team['Assassin']), ss.clue_word, ss.gs_left)
+            ss.num_turns += 1
+            
             ss.gs_logs.append([])
             bt_guess = guess
         # Codemaster
@@ -215,6 +220,7 @@ def parse_clue():
     ss.cm_logs.append(ss.clue)
 
     insert_turn(ss.game_id, json.dumps(ss.by_team['Red']), json.dumps(ss.by_team['Blue']), json.dumps(ss.by_team['Neutral']), json.dumps(ss.by_team['Assassin']), ss.clue_word, ss.gs_left)
+    ss.num_turns += 1
 
     ss.gs_logs.append([])
     ss.user_input = ""
