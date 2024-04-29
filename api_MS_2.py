@@ -46,8 +46,11 @@ def generate_clue(history, team_red_words, team_blue_words, neutral_words, assas
     Your response must be 1 line: one tuple.
     """
 
-    messages = [{"role" : "user", "content" : prompt}]
-    messages.extend(history)
+    #messages = [{"role" : "user", "content" : prompt}]
+    #messages.extend(history)
+
+    message = [{"role" : "user", "content" : prompt}]
+    history.extend(message)
 
     # response = client.chat.completions.create(
     #     model="gpt-3.5-turbo-0125",
@@ -62,7 +65,7 @@ def generate_clue(history, team_red_words, team_blue_words, neutral_words, assas
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
-        messages=messages
+        messages=history#messages
     )
 
     clue = response.choices[0].message.content
@@ -99,7 +102,10 @@ def response_format(raw):
 
 
 def match(all_words, team_words, assassin_word):
-    spymaster = generate_clue(team_red_words, team_blue_words, neutral_words, assassin_word)
+
+    chat_history = []
+
+    spymaster = generate_clue(chat_history, team_red_words, team_blue_words, neutral_words, assassin_word)
     # spymaster = random.choice(spymaster_output)
     # print(spymaster)
     try:
@@ -109,6 +115,9 @@ def match(all_words, team_words, assassin_word):
 
     clue = response_format(clue)
     clue[1] = int(clue[1])
+
+    chat_history.append({"role": "system", "content": json.dumps(clue)})
+
     answer = response_format(answer)
 
     print(f"Spymaster's Clue: {clue}")
@@ -117,6 +126,9 @@ def match(all_words, team_words, assassin_word):
     guess = guess_word(clue, all_words)
     # guess = random.choice(guesser_output)
     guess = response_format(guess)
+
+    chat_history.append({"role" : "user", "content" : json.dumps(guess)})
+
     print(f"Guesser's Guess: {guess}")
 
     return clue, answer, guess
@@ -154,6 +166,7 @@ def gpt_vs_gpt():
     error = 0 
     curr_team = "red"
     curr_lst = team_red_words
+
 
     while team_red_words:
         print(f"Turn {matches}, {curr_team} team")
@@ -244,3 +257,4 @@ def gpt_vs_user():
 #     print()
 
 gpt_vs_user() 
+#gpt_vs_gpt()
