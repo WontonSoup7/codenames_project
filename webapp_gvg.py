@@ -63,7 +63,7 @@ if 'words' not in ss:
     new_game()
 
 if "counters" not in ss:
-    ss.counters = {"Win": 0, "Loss": 0, "Correct": 0, "Incorrect": 0}
+    ss.counters = {"Win": 0, "Loss": 0, "Correct": 0, "Incorrect": 0, "Error": 0}
 if "error_ct" not in ss:
     ss.error_ct = 0
 # st.write(ss.error_ct)
@@ -136,6 +136,7 @@ def gvg():
                         break
                     ss.error_ct += 1
                 except Exception as e:
+                    ss.counters['Errors'] += 1
                     print(e)
                     pass
             print(ss.clue_word, ss.gs_left)
@@ -152,7 +153,7 @@ def gvg():
                         ss.curr_dict[gs] += 0
                     break
                 except Exception as e: 
-                    ss.user_input = ""
+                    ss.counters['Errors'] += 1
                     ss.gs_array = []
                     print(e)
             for gs in ss.gs_array:
