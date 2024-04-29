@@ -63,10 +63,11 @@ if 'words' not in ss:
     new_game()
 
 if "counters" not in ss:
-    ss.counters = {"Win": 0, "Loss": 0, "Correct": 0, "Incorrect": 0, "Error": 0}
+    ss.counters = {"Win": 0, "Loss": 0, "Correct": 0,
+                   "Incorrect": {"Blue": 0, "Neutral": 0, "Assassin": 0}
+                   , "Error": 0}
 if "error_ct" not in ss:
     ss.error_ct = 0
-# st.write(ss.error_ct)
     
 
 
@@ -86,13 +87,13 @@ def guess(name):
             ss.counters['Correct'] += 1
             ss.counters['Win'] += 1
         else:
-            ss.counters['Incorrect'] += 1
+            ss.counters['Incorrect'][team] += 1
             ss.counters['Loss'] += 1
         ss.curr_dict = {}
         ss.game_started = False
         return True
     elif team != "Red":
-        ss.counters['Incorrect'] += 1
+        ss.counters['Incorrect'][team] += 1
         ss.gs_left = 0
         return True
     ss.counters['Correct'] += 1
@@ -136,7 +137,7 @@ def gvg():
                         break
                     ss.error_ct += 1
                 except Exception as e:
-                    ss.counters['Errors'] += 1
+                    ss.counters['Error'] += 1
                     print(e)
                     pass
             print(ss.clue_word, ss.gs_left)
@@ -153,14 +154,14 @@ def gvg():
                         ss.curr_dict[gs] += 0
                     break
                 except Exception as e: 
-                    ss.counters['Errors'] += 1
+                    ss.counters['Error'] += 1
                     ss.gs_array = []
                     print(e)
             for gs in ss.gs_array:
                 if guess(gs):
                     break
         new_game()
-    st.markdown(ss.counters)
+    st.write(ss.counters)
         
 with st.columns([2, 1, 2])[1]:
     st.button("Start testing", on_click=gvg, disabled=not ss.game_started)
