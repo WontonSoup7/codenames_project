@@ -125,7 +125,7 @@ def gvg():
                 try:
                     ss.clue, ss.cm_prompt = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
-                    print(ss.clue)
+                    print("debug clue: " + json.dumps(ss.clue))
                     ss.clue = ss.clue.split(": ")
                     ss.clue = ss.clue[1].split(", ")
                     ss.clue[1] = int(ss.clue[1])
@@ -138,6 +138,7 @@ def gvg():
                     ss.error_ct += 1
                 except Exception as e:
                     ss.counters['Error'] += 1
+                    print("Exception caught for clue")
                     print(e)
                     pass
             print(ss.clue_word, ss.gs_left)
@@ -156,6 +157,8 @@ def gvg():
                 except Exception as e: 
                     ss.counters['Error'] += 1
                     ss.gs_array = []
+                    print("Exception caught for guess")
+                    print(ss.gs_array)
                     print(e)
             for gs in ss.gs_array:
                 if guess(gs):

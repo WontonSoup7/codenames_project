@@ -9,40 +9,12 @@ load_dotenv()
 OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
 client = OpenAI(api_key=OPEN_AI_API_KEY)
 
-# Define the Codenames board (25 words for simplicity)
-board_words = [
-    "Egypt", "Pitch", "Deck", "Well", "Fair",
-    "Tooth", "Staff", "Bill", "Shot", "King",
-    "Pan", "Square", "Press", "Seal", "Bear",
-    "Spike", "Center", "Face", "Palm", "Crane",
-    "Rock", "Stick", "Tag", "Disease", "Yard"
-]
-
-# Teams' words (for simplicity, not used in clue generation/guessing logic here)
-team_red_words = ["Egypt", "Pitch", "Deck", "Well", "Fair", "Tooth", "Staff", "Bill", "Shot"]
-team_blue_words = ["King", "Pan", "Square", "Press", "Seal", "Bear", "Spike", "Center", "Face"]
-neutral_words = ["Palm", "Crane", "Rock", "Stick", "Tag", "Disease", "Yard"]
-assassin_word = ["Battery"] #was originally "Pitch" but that is a red team word so i wanted it to be different
-
 def create_prompt(template, replacements):  
     return template.format(**replacements)
 
 def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
     prompt = """
-    Examples:
-    ___
-    Input:
-    Red words: [BOMB, OPERA, PISTOL, BARK, BATTERY, DISEASE, ROW, BEAR]
-    Blue words: [MARBLE, MILLIONAIRE, PORT, BOTTLE, TAP, VAN, NEEDLE, PUMPKIN]
-    Assassin word: [KNIGHT]
-    Civilian words: [BAR, ICE, BERLIN, PLOT, CYCLE, BOLT, RULER, CAT]
-    Output:
-    Clue: Loud, 4
-    Logic: 
-    [BOMB, OPERA, PISTOL, BARK]
-    ___
-
     You are the red codemaster in a codenames game and your job is to 
     give a clue at the end of the prompt given these words 
     (Note: Your clue may not be any of these words):
@@ -57,28 +29,30 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     The clue must be in the format "Clue: Word,Number". For example "Clue: Bird,3"
     Do not return anything else.
     """
-    # THe clue must be semantically far from all the bad words, 
-    # have little semantically association with the neutral words,
-    # and have no semantic association with the instant death word.
-    # Pick the words in good words that have the strongest semantic connection
-    # and derive a clue that is semantically relates to these words.
-    # The number you give should be the number of words your clue aims to indicate.
-    # The clue should encourage diversity.
-    # The clue must be in the format "Word:Number". For example "Bird: 3"
-    # Do not return aynthing else."""
 
+    usr_prompts = [
+        {
+            'red_words': ['BOMB', 'OPERA', 'PISTOL', 'BARK', 'BATTERY', 'DISEASE', 'ROW', 'BEAR'],
+            'blue_words': ['MARBLE', 'MILLIONAIRE', 'PORT', 'BOTTLE', 'TAP', 'VAN', 'NEEDLE', 'PUMPKIN'],
+            'neutral_words': ['BAR', 'ICE', 'BERLIN', 'PLOT', 'CYCLE', 'BOLT', 'RULER', 'CAT'],
+            'assassin_word': ['KNIGHT'],
+        },
+        {
+            'red_words': ['COLD', 'WAR', 'NUT', 'BELT', 'WEB', 'PLATE', 'WORM', 'RING'],
+            'blue_words': ['OPERA', 'BOOM', 'HEAD', 'MICROSCOPE', 'STRING', 'GLOVE', 'BOARD', 'TRACK', 'CLOAK'],
+            'neutral_words': ['STAR', 'SERVER', 'TUBE', 'LUCK', 'BRUSH', 'ROUND', 'POINT'],
+            'assassin_word': ['CIRCLE'],
+        }
+    ]
 
-    # prompt = f"""Act as a spymaster for the red team in Codenames game. 
-    # The red team words are {red_words}. 
-    # The blue team words are {blue_words}. 
-    # The neutral words are {neutral_words}.
-    # The assassin word is {assassin_word}.
-    # Generate a clue for the red team Codenames based on these words.
-    # Check your knowledge base for the rules of the codenames game.
-    # Your clue must abide by these rules. For example one of the rules is
-    # that the word must not appear in red team, blue team, neutral, or assassin.
-    # The clue must be in the format "Word:Number". For example "Bird: 3"
-    # Do not return aynthing else."""
+    outputs = [
+        """
+        Clue: Loud, 4
+        """,
+        """
+        Clue: USSR, 2
+        """,
+    ]
 
     replacements = {
         'red_words' : red_words,
@@ -87,78 +61,121 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
         'assassin_word' : assassin_word
     }
 
+    msgs = []
+    for i in range(len(usr_prompts)):
+        tmp_prompt = create_prompt(prompt, usr_prompts[i])
+        # print(tmp_prompt)
+        msgs.append(
+            {
+                "role": "user",
+                "content": tmp_prompt,
+            },
+        )
+        msgs.append(
+            {
+                "role": "assistant",
+                "content": outputs[i],
+            },
+        )
+
     old_prompt = prompt
     prompt = create_prompt(prompt, replacements)
 
+    msgs.append(
+        {
+            "role": "user",
+            "content": prompt,
+        },
+    )
+ 
+
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
-        messages=[
-            {
-                "role" : "user", 
-                "content" : prompt,
-            }, 
-        ],
+        messages=msgs
     )
 
     clue = response.choices[0].message.content
     return clue, old_prompt
 
 def gen_guess(clue, board_words):
+
+    # ALL EXAMPLES OF OUTPUT MUST USE DOUBLE QUOTES
     prompt = """Act as a guesser in Codenames game.
     You are given the clue: '{clue}' and the list of words on the 
     board: {board_words}.
     Give your best guesses from {board_words} in a python array format: 
-        "[Guess1, Guess2, Guess3, etc.]". 
-    Example:
-    ___
-    Input: 
-    Clue: [Loud, 4], Board Words: ['BOMB', 'PORT', 'BOLT', 'CYCLE', 
-    'BATTERY', 'DISEASE', 'MARBLE', 'CAT', 'VAN', 'BEAR', 'ROW', 
-    'PISTOL', 'NEEDLE', 'PUMPKIN', 'BAR', 'BERLIN', 'OPERA', 'ICE', 
-    'TAP', 'PLOT', 'RULER', 'MILLIONAIRE', 'BARK', 'BOTTLE', 'KNIGHT']
-    Output: 
-    [BOMB, OPERA, PISTOL, BARK] 
-    ___
+        ["Guess1", "Guess2", "Guess3", ...] 
     There must be {clue[1]} number of guesses. 
     The guesses must be ordered from your best guess to your worst guess.
-    Each guess must be one of these words: {board_words}.
+    Each guess MUST be one of these words: {board_words}.
+    Each guess MUST be one of these words: {board_words}.
     The number of guesses must match the number provided in the clue.
     Do not return anything else besides your array of guesses."""
 
+    usr_prompts = [
+            {
+                'board_words': """['BOMB', 'OPERA', 'PISTOL', 'BARK', 'BATTERY', 'DISEASE', 'ROW', 'BEAR',
+                    'MARBLE', 'MILLIONAIRE', 'PORT', 'BOTTLE', 'TAP', 'VAN', 'NEEDLE', 'PUMPKIN',
+                    'BAR', 'ICE', 'BERLIN', 'PLOT', 'CYCLE', 'BOLT', 'RULER', 'CAT','KNIGHT'],""",
+                'clue': ["LOUD", 4]
+            },
+            {
+                'board_words': """['COLD', 'WAR', 'NUT', 'BELT', 'WEB', 'PLATE', 'WORM', 'RING',
+                    'OPERA', 'BOOM', 'HEAD', 'MICROSCOPE', 'STRING', 'GLOVE', 'BOARD', 'TRACK', 'CLOAK',
+                    'STAR', 'SERVER', 'TUBE', 'LUCK', 'BRUSH', 'ROUND', 'POINT','CIRCLE'],""",
+                'clue': ["USSR", 2]
+            }
+        ]
+
+    outputs = [
+        """
+        ["BOMB", "OPERA", "PISTOL", "BARK"]
+        """,
+        """
+        ["COLD", "WAR"]
+        """
+    ]
     replacements = {
         'clue' : clue,
         'board_words' : board_words
     }
 
+    msgs = []
+    for i in range(len(usr_prompts)):
+        tmp_prompt = create_prompt(prompt, usr_prompts[i])
+        # print(tmp_prompt)
+        msgs.append(
+            {
+                "role": "user",
+                "content": tmp_prompt,
+            },
+        )
+        msgs.append(
+            {
+                "role": "assistant",
+                "content": outputs[i],
+            },
+        )
+
     old_prompt = prompt
     prompt = create_prompt(prompt, replacements)
 
+    #print(prompt)
+    msgs.append(
+        {
+            "role": "user",
+            "content": prompt,
+        },
+    )
+
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
-        messages=[
-            {
-                "role" : "user", 
-                "content" : prompt,
-            }, 
-        ],
+        messages=msgs
     )
 
     guess = response.choices[0].message.content
+    print("guess: " + guess)
     return guess, old_prompt
 
 
 
-# Example gameplay loop for one round
-if __name__ == "__main__":
-    #selected_words = random.choice(board_words)
-
-    #clue = generate_clue(selected_words)
-    #clue, _ = gen_guess(team_red_words, team_blue_words, neutral_words, assassin_word)
-    clue, _ = gen_clue(team_red_words, team_blue_words, neutral_words, assassin_word)
-    print(f"Spymaster's Clue: {clue}")
-    print(_)
-
-    #guess, _ = gen_clue(clue, board_words)
-    guess, _ = gen_guess(clue, board_words)
-    print(f"Guesser's Guess: {guess}")
-    print(_)
