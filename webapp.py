@@ -43,12 +43,12 @@ if 'words' not in ss:
     word_list = [word.strip() for word in word_list]
     words = random.sample(word_list, 25)
     words_dict = {}
-    for i in range(3):
-        for j in range(8):
-            words_dict[words[8*i + j]] = i
-            #add the words to the db
-            #if (i == 0 and j == 0):
-            #    c.execute(f"INSERT INTO BOARD()")
+    numperteam = [8, 7, 9, 1]
+    ctr = 0
+    for i in range(len(numperteam)):
+        for j in range(numperteam[i]):
+            words_dict[words[ctr]] = i
+            ctr += 1
     words_dict[words[-1]] = 3
     random.shuffle(words)
     ss.words = words
@@ -61,7 +61,7 @@ if 'words' not in ss:
     ss.clicked = {word:False for word in words_dict}
     ss.all_disabled = {word:True for word in words_dict}
     ss.clicked, ss.all_disabled = ss.all_disabled, ss.clicked
-    ss.guessed = {"Red":8, "Blue":8, "Neutral":8, "Assassin":1}
+    ss.guessed = {"Red":8, "Blue":7, "Neutral":9, "Assassin":1}
     ss.gs_left = 0
     ss.by_team = {"Red":[], "Blue":[], "Neutral":[], "Assassin":[]}
     ss.error_ct = 0
