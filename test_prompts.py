@@ -42,7 +42,13 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
             'blue_words': ['OPERA', 'BOOM', 'HEAD', 'MICROSCOPE', 'STRING', 'GLOVE', 'BOARD', 'TRACK', 'CLOAK'],
             'neutral_words': ['STAR', 'SERVER', 'TUBE', 'LUCK', 'BRUSH', 'ROUND', 'POINT'],
             'assassin_word': ['CIRCLE'],
-        }
+        },
+        {
+            "red_words": ["ANGEL", "STAR", "BOX", "PARK", "KID", "SWITCH", "TAIL", "BUG", "TABLE"],
+            "blue_words": ["STAFF", "COPPER", "EUROPE", "PRESS", "CELL", "SCORPION", "WORM", "DUCK"],
+            "neutral_words": ["BOLT", "MOSCOW", "APPLE", "COTTON", "SPINE", "DISEASE", "SERVER"],
+            "assassin_word": ["SKYSCRAPER"]
+        },
     ]
 
     outputs = [
@@ -51,6 +57,9 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
         """,
         """
         Clue: USSR, 2
+        """,
+        """
+        Clue: CHRISTMAS, 3
         """,
     ]
 
@@ -108,23 +117,31 @@ def gen_guess(clue, board_words):
     There must be {clue[1]} number of guesses. 
     The guesses must be ordered from your best guess to your worst guess.
     Each guess MUST be one of these words: {board_words}.
-    Each guess MUST be one of these words: {board_words}.
     The number of guesses must match the number provided in the clue.
-    Do not return anything else besides your array of guesses."""
+    Do not return anything else besides your array of guesses.
+    Each guess MUST be in: {board_words}."""
 
     usr_prompts = [
             {
                 'board_words': """['BOMB', 'OPERA', 'PISTOL', 'BARK', 'BATTERY', 'DISEASE', 'ROW', 'BEAR',
                     'MARBLE', 'MILLIONAIRE', 'PORT', 'BOTTLE', 'TAP', 'VAN', 'NEEDLE', 'PUMPKIN',
-                    'BAR', 'ICE', 'BERLIN', 'PLOT', 'CYCLE', 'BOLT', 'RULER', 'CAT','KNIGHT'],""",
+                    'BAR', 'ICE', 'BERLIN', 'PLOT', 'CYCLE', 'BOLT', 'RULER', 'CAT','KNIGHT']""",
                 'clue': ["LOUD", 4]
             },
             {
                 'board_words': """['COLD', 'WAR', 'NUT', 'BELT', 'WEB', 'PLATE', 'WORM', 'RING',
                     'OPERA', 'BOOM', 'HEAD', 'MICROSCOPE', 'STRING', 'GLOVE', 'BOARD', 'TRACK', 'CLOAK',
-                    'STAR', 'SERVER', 'TUBE', 'LUCK', 'BRUSH', 'ROUND', 'POINT','CIRCLE'],""",
+                    'STAR', 'SERVER', 'TUBE', 'LUCK', 'BRUSH', 'ROUND', 'POINT','CIRCLE']""",
                 'clue': ["USSR", 2]
-            }
+            },
+            {
+                'board_words': """['SKYSCRAPER', 'TAIL', 'SPINE', 'WORM', 
+                'STAFF', 'MOSCOW', 'BOLT', 'SERVER', 'PRESS', 
+                'KID', 'DUCK', 'SCORPION', 'ANGEL', 'TABLE', 'COTTON', 
+                'APPLE', 'BOX', 'BUG', 'EUROPE', 'CELL', 'DISEASE', 
+                'COPPER', 'STAR', 'SWITCH', 'PARK']""",
+                'clue':["CHRISTMAS", 3]
+            },
         ]
 
     outputs = [
@@ -133,7 +150,10 @@ def gen_guess(clue, board_words):
         """,
         """
         ["COLD", "WAR"]
+        """,
         """
+        ["ANGEL", "STAR", "BOX"]
+        """,
     ]
     replacements = {
         'clue' : clue,
