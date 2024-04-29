@@ -183,7 +183,6 @@ if ss.game_started:
                     if (ss.prompt_inserted == False):
                         insert_prompt(ss.game_id, ss.cm_prompt, False)
                         ss.prompt_inserted = True
-                    print(ss.clue)
                     ss.clue = ss.clue.split(": ")
                     ss.clue = ss.clue[1].split(", ")
                     ss.clue[1] = int(ss.clue[1])
@@ -245,7 +244,6 @@ def call_guesser():
                     ss.prompt_inserted = True
                 ss.gs_array = json.loads(ss.gs_array)
                 for gs in ss.gs_array:
-                    print("guess: " + gs)
                     ss.curr_dict[gs] += 0
                 break
             except Exception as e: 

@@ -1,3 +1,4 @@
+import json
 from openai import OpenAI
 import random
 
@@ -53,7 +54,7 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
 
     outputs = [
         """
-        Clue: Loud, 4
+        Clue: LOUD, 4
         """,
         """
         Clue: USSR, 2
@@ -110,16 +111,17 @@ def gen_guess(clue, board_words):
 
     # ALL EXAMPLES OF OUTPUT MUST USE DOUBLE QUOTES
     prompt = """Act as a guesser in Codenames game.
-    You are given the clue: '{clue}' and the list of words on the 
+    You are given the clue: {clue} and the list of words on the 
     board: {board_words}.
-    Give your best guesses from {board_words} in a python array format: 
+    Give your best guesses with words from {board_words} in a python array format: 
         ["Guess1", "Guess2", "Guess3", ...] 
+    Each guess MUST be one of these words: {board_words}
     There must be {clue[1]} number of guesses. 
     The guesses must be ordered from your best guess to your worst guess.
-    Each guess MUST be one of these words: {board_words}.
     The number of guesses must match the number provided in the clue.
     Do not return anything else besides your array of guesses.
-    Each guess MUST be in: {board_words}."""
+    None of the guesses can be {clue[0]}.
+    """
 
     usr_prompts = [
             {
@@ -194,6 +196,8 @@ def gen_guess(clue, board_words):
     )
 
     guess = response.choices[0].message.content
+    print("board: " + board_words)
+    print("clue: " + json.dumps(clue))
     print("guess: " + guess)
     return guess, old_prompt
 

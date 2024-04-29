@@ -151,7 +151,6 @@ def gvg():
                     ss.gs_array, ss.guesser_prompt = gen_guess(clue=ss.clue, board_words = json.dumps([key for key in ss.curr_dict.keys()]))
                     ss.gs_array = json.loads(ss.gs_array)
                     for gs in ss.gs_array:
-                        print("guess: " + gs)
                         ss.curr_dict[gs] += 0
                     break
                 except Exception as e: 
