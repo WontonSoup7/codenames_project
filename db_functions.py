@@ -243,6 +243,18 @@ def fetch_all_prompts():
     finally:
         conn.close()
 
+def fetch_all_turns():
+    conn = get_db_connection()
+    try:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM TURN")
+            results = cursor.fetchall()
+            return results
+    finally:
+        conn.close()
+
+
 def fetch_all_words():
     conn = get_db_connection()
     try:
