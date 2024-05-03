@@ -50,7 +50,9 @@ def generate_clue(history, team_red_words, team_blue_words, neutral_words, assas
     #messages.extend(history)
 
     message = [{"role" : "user", "content" : prompt}]
-    history.extend(message)
+    msgs = history
+    #history.extend(message)
+    msgs.extend(message)
 
     # response = client.chat.completions.create(
     #     model="gpt-3.5-turbo-0125",
@@ -65,7 +67,7 @@ def generate_clue(history, team_red_words, team_blue_words, neutral_words, assas
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
-        messages=history#messages
+        messages=msgs#messages
     )
 
     clue = response.choices[0].message.content
@@ -238,8 +240,8 @@ def gpt_vs_user():
                 print("incorrect")
                 incorrect += 1
                 break
+            
         chat_history.append({"role" : "user", "content" : json.dumps(guesses)})
-        #chat_history.append({"role" : "user", "content" : ""})
         chat_history = chat_history[-10:]
 
         matches += 1
