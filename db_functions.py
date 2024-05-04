@@ -106,6 +106,22 @@ def update_prompt_after_win_loss(prompt_id, game_id, win=True):
     finally:
         conn.close()
 
+
+def fetch_top_n(table_name, col_name, n):
+    conn = get_db_connection()
+    try:
+        c = conn.cursor()
+        c.execute("""SELECT {} 
+                  FROM {}
+                  ORDER BY {} DESC
+                  LIMIT {};""".format(col_name, table_name, col_name, n))
+        res = c.fetchall()
+        return res
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        conn.close()
+
 # def update_prompt_after_loss(game_id):
 #     conn = get_db_connection()
 #     try:
@@ -242,6 +258,18 @@ def fetch_all_prompts():
             return results
     finally:
         conn.close()
+
+def fetch_all_turns():
+    conn = get_db_connection()
+    try:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM TURN")
+            results = cursor.fetchall()
+            return results
+    finally:
+        conn.close()
+
 
 def fetch_all_words():
     conn = get_db_connection()

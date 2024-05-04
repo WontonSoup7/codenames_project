@@ -114,6 +114,27 @@ def guess(name):
 
     if not ss.guessed[team] and team != "Neutral":
         toggle_board()
+
+        #-------DATABASE TESTS--------
+
+        #JUST for test purposeses- delete these next lines (after this comment and before return) later
+        #c.execute("SELECT * FROM GAME")
+        #game_data = c.fetchall()
+        game_data = fetch_all_games()
+        st.title("GAME DATA")
+        st.text(game_data)
+        st.title("WORD DATA")
+        word_data = fetch_all_words()
+        st.text(word_data)
+        st.title("TURN DATA")
+        turn_data = fetch_all_turns()
+        st.text(turn_data)
+        st.title("PROMPT DATA")
+        prompt_data = fetch_all_prompts()
+        st.text(prompt_data)
+
+        
+
         for key, val in ss.words_dict.items():
             tm = teams[val]
             if (key not in ss.by_team[tm]): #word has been guessed
