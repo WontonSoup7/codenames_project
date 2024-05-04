@@ -180,17 +180,15 @@ if ss.game_started:
                 try:
                     ss.clue, ss.cm_prompt = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
-                    if (ss.prompt_inserted == False):
-                        insert_prompt(ss.game_id, ss.cm_prompt, False)
-                        ss.prompt_inserted = True
-                    ss.clue = ss.clue.split(": ")
-                    ss.clue = ss.clue[1].split(", ")
-                    ss.clue[1] = int(ss.clue[1])
+                    ss.clue = ss.clue.split(">")
+                    ss.words_to_guess = ss.clue[1]
+                    ss.clue = json.loads(ss.clue[0])
                     ss.clue_word, ss.gs_left = ss.clue
 
                     # st.text(ss.clue)
                     if ss.clue_word.upper() not in ss.words:
-                        print("CLUE: " + json.dumps(ss.clue))
+                        print("clue: " + json.dumps(ss.clue))
+                        print("indicates: " + json.dumps(ss.words_to_guess))
                         break
                     ss.error_ct += 1
                 except Exception as e:

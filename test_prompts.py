@@ -14,23 +14,47 @@ def create_prompt(template, replacements):
     return template.format(**replacements)
 
 def gen_clue(red_words, blue_words, neutral_words, assassin_word):
+    # print("GENERATING CLUE")
     #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
+    # prompt = """
+    #     YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME.
+    #     GIVE A WORD TO CONNECT ONE OR TWO OF THE {red_words} WHICH HAS NO CONNECTION TO: {blue_words},{neutral_words}
+    #     AVOID ANY CONNECTION TO THIS WORD AT ALL COSTS {assassin_word}.
+    #     THE CLUE MUST BE ONLY ONE WORD AND MAY NOT APPEAR IN THE GIVEN WORDS.
+    #     RETURN A LIST OF WORD(S) IN THE GIVEN WORDS THAT YOUR CLUE AIMS TO INDICATE; THE NUMBER OF WORDS WILL BE THE NUMBER OF GUESSES ALLOWED IN THE CLUE.
+    #     DO NOT RETURN ANYTHING ELSE.
+    # """
+    prompt2 = """
+        YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME
+        RED WORDS: {red_words},
+        BLUE WORDS: {blue_words},
+        CIVILIAN WORDS: {neutral_words},
+        ASSASSIN: {assassin_word}.
+        DOES THERE EXIST A BETTER {clue} FOR THE RED TEAM?
+        IF NOT:
+            1. RETURN THE SAME CLUE. 
+        IF YES: 
+            1. MODIFY THE CLUE OR CREATE A NEW HUMAN CLUE TO MAXIMIZE RED TEAM'S CHANCES OF WINNING WHILE AVOIDING THE ASSASSIN WORD GIVEN THESE TEAMS:
+                RED WORDS: {red_words},
+                BLUE WORDS: {blue_words},
+                CIVILIAN WORDS: {neutral_words},
+                ASSASSIN: {assassin_word}.
+            3. YOUR CLUE MAY NOT HAVE APPEARED IN ANY OF THESE WORDS AND MUST BE ONE WORD ONLY AND THE CLUE NUMBER MAY NOT BE MORE THAN THE AMOUNT OF RED WORDS. 
+            4. RETURN THE CLUE FOLLOWED BY A LIST OF THE RED TEAM WORDS THAT THE CLUE AIMS TO INDICATE.
+        """
     prompt = """
-    You are the red codemaster in a codenames game and your job is to 
-    give a clue at the end of the prompt given these words 
-    (Note: Your clue may not be any of these words):
-    Red words: {red_words} 
-    Blue words: {blue_words}
-    Civilian words: {neutral_words}
-    Assassin: {assassin_word}.
-    The clue MUST relate to EACH words it aims to indicate.
-    Clues must be easy.
-    The clue number may not be more than the amount of red words.
-    Your clue may not have appeared in any of these words and must be one word only. 
-    The clue must be in the format "Clue: Word,Number". For example "Clue: Bird,3"
-    Do not return anything else.
+        YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME
+        RED WORDS: {red_words}
+        BLUE WORDS: {blue_words}
+        CIVILIAN WORDS: {neutral_words}
+        ASSASSIN: {assassin_word}.
+        THE CLUE SHOULD AVOID INDICATING THE ASSASSIN WORD AT ALL COSTS WHILE STRONGLY INDICATING SELECT RED WORDS AND EXTREMELY WEAKLY INDICATING BLUE AND CIVILIAN WORDS
+        YOU MUST AVOID TEH ASSASSIN WORD OR YOU INSTANTLY LOSE.
+        THE CLUE NUMBER MAY NOT BE MORE THAN THE AMOUNT OF RED WORDS.
+        YOUR CLUE MAY NOT HAVE APPEARED IN ANY OF THESE WORDS AND MUST BE ONE WORD ONLY.
+        RETURN THE CLUE FOLLOWED BY A LIST OF THE RED TEAM WORDS THAT THE CLUE AIMS TO INDICATE.
+        DO NOT RETURN ANYTHING ELSE.
     """
-
     usr_prompts = [
         {
             'red_words': ['BOMB', 'OPERA', 'PISTOL', 'BARK', 'BATTERY', 'DISEASE', 'ROW', 'BEAR'],
@@ -53,15 +77,9 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     ]
 
     outputs = [
-        """
-        Clue: LOUD, 4
-        """,
-        """
-        Clue: USSR, 2
-        """,
-        """
-        Clue: CHRISTMAS, 3
-        """,
+        '["LOUD", 4]>(BOMB, OPERA, PISTOL, BARK)',
+        '["USSR", 2]>(COLD, WAR)',
+        '["CHRISTMAS", 3]>(ANGEL, STAR, BOX)',
     ]
 
     replacements = {
@@ -70,6 +88,11 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
         'neutral_words' : neutral_words,
         'assassin_word' : assassin_word
     }
+
+    
+
+    old_prompt = prompt
+    prompt = create_prompt(prompt, replacements)
 
     msgs = []
     for i in range(len(usr_prompts)):
@@ -88,9 +111,6 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
             },
         )
 
-    old_prompt = prompt
-    prompt = create_prompt(prompt, replacements)
-
     msgs.append(
         {
             "role": "user",
@@ -98,29 +118,74 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
         },
     )
  
-
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
         messages=msgs
     )
 
     clue = response.choices[0].message.content
-    return clue, old_prompt
+    print("CLUE 1: " + clue)
+
+    curr_clue = clue
+    clues = []
+    while curr_clue.split(">")[0] not in clues:
+        random.shuffle(red_words)
+        prompt = create_prompt(prompt, replacements)
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-0125",
+            messages=msgs
+        )
+        clues.append(curr_clue.split(">")[0])
+        curr_clue = response.choices[0].message.content
+        print("CURRENT CLUE: " + curr_clue)
+
+
+    # replacements2 = {
+    #     'red_words' : red_words,
+    #     'blue_words' : blue_words,
+    #     'neutral_words' : neutral_words,
+    #     'assassin_word' : assassin_word,
+    #     'clue' : clue
+    # }
+
+    # old_clue = clue
+    
+    # prompt2 = create_prompt(prompt2, replacements2)
+    # response2 = client.chat.completions.create(
+    #     model="gpt-3.5-turbo-0125",
+    #     messages=msgs
+    # )
+
+    # clues = [old_clue.split(">")[0]]
+    # curr_clue = response2.choices[0].message.content
+    # while curr_clue.split(">")[0] not in clues:
+    #     replacements2['clue'] = curr_clue
+    #     prompt2 = create_prompt(prompt2, replacements2)
+    #     response2 = client.chat.completions.create(
+    #         model="gpt-3.5-turbo-0125",
+    #         messages=msgs
+    #     )
+    #     old_clue = curr_clue
+    #     clues.append(old_clue.split(">")[0])
+    #     curr_clue = response2.choices[0].message.content
+    #     print("CURRENT CLUE: " + curr_clue)
+    print("CLUE MATCH: " + curr_clue)
+    # print(clue)
+    return curr_clue, old_prompt
 
 def gen_guess(clue, board_words):
 
     # ALL EXAMPLES OF OUTPUT MUST USE DOUBLE QUOTES
-    prompt = """Act as a guesser in Codenames game.
-    You are given the clue: {clue} and the list of words on the 
-    board: {board_words}.
-    Give your best guesses with words from {board_words} in a python array format: 
-        ["Guess1", "Guess2", "Guess3", ...] 
-    Each guess MUST be one of these words: {board_words}
-    There must be {clue[1]} number of guesses. 
-    The guesses must be ordered from your best guess to your worst guess.
-    The number of guesses must match the number provided in the clue.
-    Do not return anything else besides your array of guesses.
-    None of the guesses can be {clue[0]}.
+    prompt = """ACT AS THE GUESSER IN A CODENAMES GAME.
+    YOU ARE GIVEN THE CLUE: {clue} AND THE LIST OF WORDS ON THE
+    BOARD: {board_words} RETURN THE WORDS FROM THE BOARD MOST ASSOCIATED WITH THE CLUE DESCENDING ORDER.
+        ["GUESS1", "GUESS2", "GUESS3", ...]
+    EACH GUESS MUST BE ONE OF THESE WORDS: {board_words}
+    THERE MUST BE {clue[1]} NUMBER OF GUESSES.
+    THE GUESSES MUST BE ORDERED FROM YOUR BEST GUESS TO YOUR WORST GUESS.
+    THE NUMBER OF GUESSES MUST MATCH THE NUMBER PROVIDED IN THE CLUE.
+    DO NOT RETURN ANYTHING ELSE BESIDES YOUR ARRAY OF GUESSES.
+    NONE OF THE GUESSES CAN BE {clue[0]}.
     """
 
     usr_prompts = [
@@ -147,15 +212,9 @@ def gen_guess(clue, board_words):
         ]
 
     outputs = [
-        """
-        ["BOMB", "OPERA", "PISTOL", "BARK"]
-        """,
-        """
-        ["COLD", "WAR"]
-        """,
-        """
-        ["ANGEL", "STAR", "BOX"]
-        """,
+        '["BOMB", "OPERA", "PISTOL", "BARK"]',
+        '["COLD", "WAR"]',
+        '["ANGEL", "STAR", "BOX"]',
     ]
     replacements = {
         'clue' : clue,
@@ -197,7 +256,7 @@ def gen_guess(clue, board_words):
 
     guess = response.choices[0].message.content
     print("board: " + board_words)
-    print("clue: " + json.dumps(clue))
+    # print("clue: " + json.dumps(clue))
     print("guess: " + guess)
     return guess, old_prompt
 

@@ -118,30 +118,30 @@ for i in range(len(ss.words)):
 
 ss.num_tests = st.slider(label="Number of Tests", min_value=1, max_value=30)
 def gvg():
+    print("STARTING TESTING")
     for i in range(ss.num_tests):
+        print("GAME: " + str(i))
         ss.game_started = True
         while ss.game_started:
             while True:
                 try:
                     ss.clue, ss.cm_prompt = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
-                    print("debug clue: " + json.dumps(ss.clue))
-                    ss.clue = ss.clue.split(": ")
-                    ss.clue = ss.clue[1].split(", ")
-                    ss.clue[1] = int(ss.clue[1])
+                    ss.clue = ss.clue.split(">")
+                    ss.words_to_guess = ss.clue[1]
+                    ss.clue = json.loads(ss.clue[0])
                     ss.clue_word, ss.gs_left = ss.clue
 
                     # st.text(ss.clue)
                     if ss.clue_word.upper() not in ss.words:
-                        print("CLUE: " + json.dumps(ss.clue))
+                        print("clue: " + json.dumps(ss.clue))
+                        print("indicates: " + json.dumps(ss.words_to_guess))
                         break
                     ss.error_ct += 1
                 except Exception as e:
                     ss.counters['Error'] += 1
-                    print("Exception caught for clue")
+                    print("debug clue: " + json.dumps(ss.clue))
                     print(e)
-                    pass
-            print(ss.clue_word, ss.gs_left)
             ss.cm_logs.append(ss.clue)
             ss.num_turns += 1
             
@@ -162,6 +162,7 @@ def gvg():
             for gs in ss.gs_array:
                 if guess(gs):
                     break
+            print("\n\n\n")
         new_game()
     st.write(ss.counters)
         
