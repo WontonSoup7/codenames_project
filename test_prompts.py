@@ -16,45 +16,45 @@ def create_prompt(template, replacements):
 def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     # print("GENERATING CLUE")
     #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
-    # prompt = """
-    #     YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME.
-    #     GIVE A WORD TO CONNECT ONE OR TWO OF THE {red_words} WHICH HAS NO CONNECTION TO: {blue_words},{neutral_words}
-    #     AVOID ANY CONNECTION TO THIS WORD AT ALL COSTS {assassin_word}.
-    #     THE CLUE MUST BE ONLY ONE WORD AND MAY NOT APPEAR IN THE GIVEN WORDS.
-    #     RETURN A LIST OF WORD(S) IN THE GIVEN WORDS THAT YOUR CLUE AIMS TO INDICATE; THE NUMBER OF WORDS WILL BE THE NUMBER OF GUESSES ALLOWED IN THE CLUE.
-    #     DO NOT RETURN ANYTHING ELSE.
-    # """
-    prompt2 = """
-        YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME
-        RED WORDS: {red_words},
-        BLUE WORDS: {blue_words},
-        CIVILIAN WORDS: {neutral_words},
-        ASSASSIN: {assassin_word}.
-        DOES THERE EXIST A BETTER {clue} FOR THE RED TEAM?
-        IF NOT:
-            1. RETURN THE SAME CLUE. 
-        IF YES: 
-            1. MODIFY THE CLUE OR CREATE A NEW HUMAN CLUE TO MAXIMIZE RED TEAM'S CHANCES OF WINNING WHILE AVOIDING THE ASSASSIN WORD GIVEN THESE TEAMS:
-                RED WORDS: {red_words},
-                BLUE WORDS: {blue_words},
-                CIVILIAN WORDS: {neutral_words},
-                ASSASSIN: {assassin_word}.
-            3. YOUR CLUE MAY NOT HAVE APPEARED IN ANY OF THESE WORDS AND MUST BE ONE WORD ONLY AND THE CLUE NUMBER MAY NOT BE MORE THAN THE AMOUNT OF RED WORDS. 
-            4. RETURN THE CLUE FOLLOWED BY A LIST OF THE RED TEAM WORDS THAT THE CLUE AIMS TO INDICATE.
-        """
     prompt = """
-        YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME
-        RED WORDS: {red_words}
-        BLUE WORDS: {blue_words}
-        CIVILIAN WORDS: {neutral_words}
-        ASSASSIN: {assassin_word}.
-        THE CLUE SHOULD AVOID INDICATING THE ASSASSIN WORD AT ALL COSTS WHILE STRONGLY INDICATING SELECT RED WORDS AND EXTREMELY WEAKLY INDICATING BLUE AND CIVILIAN WORDS
-        YOU MUST AVOID TEH ASSASSIN WORD OR YOU INSTANTLY LOSE.
-        THE CLUE NUMBER MAY NOT BE MORE THAN THE AMOUNT OF RED WORDS.
-        YOUR CLUE MAY NOT HAVE APPEARED IN ANY OF THESE WORDS AND MUST BE ONE WORD ONLY.
-        RETURN THE CLUE FOLLOWED BY A LIST OF THE RED TEAM WORDS THAT THE CLUE AIMS TO INDICATE.
+        YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME.
+        GIVE A WORD TO CONNECT ONE OR TWO OF THE {red_words} WHICH HAS NO CONNECTION TO: {blue_words},{neutral_words}
+        AVOID ANY CONNECTION TO THIS WORD AT ALL COSTS {assassin_word}.
+        THE CLUE MUST BE ONLY ONE WORD AND MAY NOT APPEAR IN THE GIVEN WORDS.
+        RETURN A LIST OF WORD(S) IN THE GIVEN WORDS THAT YOUR CLUE AIMS TO INDICATE; THE NUMBER OF WORDS WILL BE THE NUMBER OF GUESSES ALLOWED IN THE CLUE.
         DO NOT RETURN ANYTHING ELSE.
     """
+    # prompt2 = """
+    #     YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME
+    #     RED WORDS: {red_words},
+    #     BLUE WORDS: {blue_words},
+    #     CIVILIAN WORDS: {neutral_words},
+    #     ASSASSIN: {assassin_word}.
+    #     DOES THERE EXIST A BETTER {clue} FOR THE RED TEAM?
+    #     IF NOT:
+    #         1. RETURN THE SAME CLUE. 
+    #     IF YES: 
+    #         1. MODIFY THE CLUE OR CREATE A NEW HUMAN CLUE TO MAXIMIZE RED TEAM'S CHANCES OF WINNING WHILE AVOIDING THE ASSASSIN WORD GIVEN THESE TEAMS:
+    #             RED WORDS: {red_words},
+    #             BLUE WORDS: {blue_words},
+    #             CIVILIAN WORDS: {neutral_words},
+    #             ASSASSIN: {assassin_word}.
+    #         3. YOUR CLUE MAY NOT HAVE APPEARED IN ANY OF THESE WORDS AND MUST BE ONE WORD ONLY AND THE CLUE NUMBER MAY NOT BE MORE THAN THE AMOUNT OF RED WORDS. 
+    #         4. RETURN THE CLUE FOLLOWED BY A LIST OF THE RED TEAM WORDS THAT THE CLUE AIMS TO INDICATE.
+    #     """
+    # prompt = """
+    #     YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME
+    #     RED WORDS={red_words}
+    #     BLUE WORDS={blue_words}
+    #     CIVILIAN WORDS={neutral_words}
+    #     ASSASSIN={assassin_word}
+    #     THE CLUE MUST AVOID INDICATING THE ASSASSIN WORD WHILE STRONGLY INDICATING HIGH RELATED RED WORDS AND EXTREMELY WEAKLY INDICATING BLUE AND CIVILIAN WORDS.
+    #     YOU MUST AVOID THE ASSASSIN WORD OR YOU INSTANTLY LOSE.
+    #     THE CLUE NUMBER MAY NOT BE MORE THAN THE AMOUNT OF RED WORDS.
+    #     YOUR CLUE MAY NOT HAVE APPEARED IN ANY OF THESE WORDS AND MUST BE ONE WORD ONLY.
+    #     RETURN THE CLUE FOLLOWED BY A LIST OF THE RED TEAM WORDS: {red_words} THAT THE CLUE AIMS TO INDICATE.
+    #     DO NOT RETURN ANYTHING ELSE.
+    # """
     usr_prompts = [
         {
             'red_words': ['BOMB', 'OPERA', 'PISTOL', 'BARK', 'BATTERY', 'DISEASE', 'ROW', 'BEAR'],
@@ -129,7 +129,8 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     curr_clue = clue
     clues = []
     while curr_clue.split(">")[0] not in clues:
-        random.shuffle(red_words)
+        for repl in replacements:
+            random.shuffle(replacements[repl])
         prompt = create_prompt(prompt, replacements)
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-0125",
@@ -138,6 +139,7 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
         clues.append(curr_clue.split(">")[0])
         curr_clue = response.choices[0].message.content
         print("CURRENT CLUE: " + curr_clue)
+    print("CLUE MATCH: " + curr_clue)
 
 
     # replacements2 = {
@@ -169,7 +171,7 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     #     clues.append(old_clue.split(">")[0])
     #     curr_clue = response2.choices[0].message.content
     #     print("CURRENT CLUE: " + curr_clue)
-    print("CLUE MATCH: " + curr_clue)
+    # print("CLUE MATCH: " + curr_clue)
     # print(clue)
     return curr_clue, old_prompt
 
@@ -180,7 +182,7 @@ def gen_guess(clue, board_words):
     YOU ARE GIVEN THE CLUE: {clue} AND THE LIST OF WORDS ON THE
     BOARD: {board_words} RETURN THE WORDS FROM THE BOARD MOST ASSOCIATED WITH THE CLUE DESCENDING ORDER.
         ["GUESS1", "GUESS2", "GUESS3", ...]
-    EACH GUESS MUST BE ONE OF THESE WORDS: {board_words}
+    EACH GUESS MUST BE IN THIS LIST OF WORDS: {board_words}
     THERE MUST BE {clue[1]} NUMBER OF GUESSES.
     THE GUESSES MUST BE ORDERED FROM YOUR BEST GUESS TO YOUR WORST GUESS.
     THE NUMBER OF GUESSES MUST MATCH THE NUMBER PROVIDED IN THE CLUE.
