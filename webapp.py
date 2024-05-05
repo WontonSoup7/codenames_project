@@ -1,4 +1,4 @@
-import streamlit as st 
+import streamlit as st   # type: ignore
 import random
 import numpy as np
 import json 
@@ -6,6 +6,8 @@ import sqlite3
 import string
 from test_prompts import gen_clue
 from test_prompts import gen_guess
+# from semi_prompts import gen_clue
+# from semi_prompts import gen_guess
 from db_functions import *
 
 st.title("Codenames")
