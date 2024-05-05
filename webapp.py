@@ -201,6 +201,10 @@ if ss.game_started:
                 try:
                     ss.clue, ss.cm_prompt = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
+                    #insert cm prompt
+                    if (ss.prompt_inserted == False):
+                        insert_prompt(ss.game_id, ss.cm_prompt, False)
+                        ss.prompt_inserted = True
                     ss.clue = ss.clue.split(">")
                     ss.words_to_guess = ss.clue[1]
                     ss.clue = json.loads(ss.clue[0])
