@@ -161,15 +161,15 @@ ss.num_tests = st.slider(label="Number of Tests", min_value=1, max_value=30)
 def gvg():
     print("STARTING TESTING")
 
-    #insert all the words into the db, along with whether they've been guessed or not
-    for key, val in ss.words_dict.items():
-        tm = teams[val]
-        if (key not in ss.by_team[tm]): #word has been guessed
-            insert_word(key, ss.game_id, tm, 1)
-        else: #word was not guessed, the value for the guessed column is 0 by default
-            insert_word(key, ss.game_id, tm)
 
     for i in range(ss.num_tests):
+        #insert all the words into the db, along with whether they've been guessed or not
+        for key, val in ss.words_dict.items():
+            tm = teams[val]
+            if (key not in ss.by_team[tm]): #word has been guessed
+                insert_word(key, ss.game_id, tm, 1)
+            else: #word was not guessed, the value for the guessed column is 0 by default
+                insert_word(key, ss.game_id, tm)
         print("GAME: " + str(i))
         ss.game_started = True
         while ss.game_started:
