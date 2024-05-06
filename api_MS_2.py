@@ -10,17 +10,33 @@ load_dotenv()
 OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
 client = OpenAI(api_key=OPEN_AI_API_KEY)
 
-# Define the Codenames board (25 words for simplicity)
-all_words = [
-    "DRAGON", "GREEN",  "BAR", "CHOCOLATE", "PITCH", "SUIT", "RING", "CONDUCTOR", "CASINO", "HOLLYWOOD", "SATURN", "BOARD", "NURSE", "PLATYPUS", "BUFFALO", "LIMOUSINE", "AIR", "MINE", "BUG", "DOG", "CHAIR", "CRANE", "LUCK", "ENGINE",  "NEEDLE"
-]
+# # Define the Codenames board (25 words for simplicity)
+# all_words = [
+#     "DRAGON", "GREEN",  "BAR", "CHOCOLATE", "PITCH", "SUIT", "RING", "CONDUCTOR", "CASINO", "HOLLYWOOD", "SATURN", "BOARD", "NURSE", "PLATYPUS", "BUFFALO", "LIMOUSINE", "AIR", "MINE", "BUG", "DOG", "CHAIR", "CRANE", "LUCK", "ENGINE",  "NEEDLE"
+# ]
 
-# Teams' words (for simplicity, not used in clue generation/guessing logic here)
+# # Teams' words (for simplicity, not used in clue generation/guessing logic here)
 
-team_red_words =  ["DRAGON", "GREEN", "NURSE", "PLATYPUS", "CONDUCTOR", "CASINO", "SATURN", "BOARD"]
-team_blue_words = ["BUFFALO", "LIMOUSINE", "BAR", "CHOCOLATE", "PITCH", "SUIT", "NEEDLE", "RING"]
-neutral_words = ["AIR", "MINE", "BUG", "DOG", "CHAIR", "CRANE", "LUCK", "ENGINE"]
-assassin_word =  ["HOLLYWOOD"]
+# team_red_words =  ["DRAGON", "GREEN", "NURSE", "PLATYPUS", "CONDUCTOR", "CASINO", "SATURN", "BOARD"]
+# team_blue_words = ["BUFFALO", "LIMOUSINE", "BAR", "CHOCOLATE", "PITCH", "SUIT", "NEEDLE", "RING"]
+# neutral_words = ["AIR", "MINE", "BUG", "DOG", "CHAIR", "CRANE", "LUCK", "ENGINE"]
+# assassin_word =  ["HOLLYWOOD"]
+
+
+word_list =  open('wordlist-eng.txt', 'r').readlines()
+word_list = [word.strip() for word in word_list]
+all_words = random.sample(word_list, 25)
+team_red_words = random.sample(all_words, 8)
+team_blue_words = random.sample([w for w in all_words if w not in team_red_words], 8)
+neutral_words = random.sample([w for w in all_words if (w not in team_red_words and w not in team_blue_words)], 8)
+assassin_word = random.sample([w for w in all_words if (w not in team_red_words and w not in team_blue_words and w not in neutral_words)], 1)
+
+# print("All: ", all_words)
+# print("Red: ", team_red_words)
+# print("Blue: ", team_blue_words)
+# print("Neutral: ", neutral_words)
+# print("Assassin: ", assassin_word)
+
 
 def generate_clue(history, team_red_words, team_blue_words, neutral_words, assassin_word):
     # clue only
@@ -38,10 +54,12 @@ def generate_clue(history, team_red_words, team_blue_words, neutral_words, assas
     prompt = f"""
     From your list,{team_red_words}, give me a clue that represents some of the words from the list in some way. 
     For example, for the word cards ‘beach’, ‘whale’, and ‘water’, one could give the clue ‘ocean’, as these things are all related to the ocean. 
-    Also, give me a number that represents how many words match that clue. The single word clue must be related by meaning, so it cannot be purely phonetically related.
+    Also, give me a number that represents how many words in {team_red_words} match that clue. THE NUMBER MUST BE GREATER THAN 0! The single word clue must be related by meaning, so it cannot be purely phonetically or structurally related.
+    The word clue cannot be a homonym for the word that the clue is for. For example, "knight" is not a valid clue for "night" because they are homonyms with completely different meaning.
+    The word clue also cannot be a part of the word that it's a clue for (or vice versa). For example, "hero" is not a valid clue for "suphero" (and vice versa).
     Avoid a clue that may relate to this words: {team_blue_words}.
     Avoid a clue that relates to this words: {assassin_word}.
-    The clue word must not be from the list. 
+    THE CLUE WORD MUST NOT BE A WORD DIRECTLY FROM {all_words}! 
     Output(relationship_word, number) in tuple format. 
     Your response must be 1 line: one tuple.
     """
@@ -240,7 +258,7 @@ def gpt_vs_user():
                 print("incorrect")
                 incorrect += 1
                 break
-            
+
         chat_history.append({"role" : "user", "content" : json.dumps(guesses)})
         chat_history = chat_history[-10:]
 
@@ -250,6 +268,12 @@ def gpt_vs_user():
     print(f"Statistics: total {matches - 1} turns")
     print(f"Correct: {correct}")
     print(f"Incorrect: {incorrect}")
+
+    print("All: ", all_words)
+    print("Red: ", team_red_words)
+    print("Blue: ", team_blue_words)
+    print("Neutral: ", neutral_words)
+    print("Assassin: ", assassin_word)
     # print(f"Error: {error}")
 
 
