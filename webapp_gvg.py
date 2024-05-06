@@ -106,13 +106,13 @@ def guess(name):
 
     if not ss.guessed[team] and team != "Neutral":
 
-        #insert all the words into the db, along with whether they've been guessed or not
-        for key, val in ss.words_dict.items():
-            tm = teams[val]
-            if (key not in ss.by_team[tm]): #word has been guessed
-                insert_word(key, ss.game_id, tm, 1)
-            else: #word was not guessed, the value for the guessed column is 0 by default
-                insert_word(key, ss.game_id, tm)
+        # #insert all the words into the db, along with whether they've been guessed or not
+        # for key, val in ss.words_dict.items():
+        #     tm = teams[val]
+        #     if (key not in ss.by_team[tm]): #word has been guessed
+        #         insert_word(key, ss.game_id, tm, 1)
+        #     else: #word was not guessed, the value for the guessed column is 0 by default
+        #         insert_word(key, ss.game_id, tm)
 
         prompt_id_guesser = get_prompt_id(ss.guesser_prompt, guesser=True)
         prompt_id_cm = get_prompt_id(ss.cm_prompt, guesser=False)
@@ -160,6 +160,15 @@ for i in range(len(ss.words)):
 ss.num_tests = st.slider(label="Number of Tests", min_value=1, max_value=30)
 def gvg():
     print("STARTING TESTING")
+
+    #insert all the words into the db, along with whether they've been guessed or not
+    for key, val in ss.words_dict.items():
+        tm = teams[val]
+        if (key not in ss.by_team[tm]): #word has been guessed
+            insert_word(key, ss.game_id, tm, 1)
+        else: #word was not guessed, the value for the guessed column is 0 by default
+            insert_word(key, ss.game_id, tm)
+
     for i in range(ss.num_tests):
         print("GAME: " + str(i))
         ss.game_started = True
