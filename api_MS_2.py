@@ -60,6 +60,7 @@ def generate_clue(history, team_red_words, team_blue_words, neutral_words, assas
     Avoid a clue that may relate to this words: {team_blue_words}.
     Avoid a clue that relates to this words: {assassin_word}.
     THE CLUE WORD MUST NOT BE A WORD FROM {all_words}! 
+    THE CLUE MUST NOT CONTAIN ANY SPACES!
     Try to avoid using previously used clues and come up with an original clue.
     Output(relationship_word, number) in tuple format. 
     Your response must be 1 line: one tuple.
