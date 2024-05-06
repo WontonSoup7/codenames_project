@@ -68,6 +68,23 @@ if "counters" not in ss:
                    , "Error": 0}
 if "error_ct" not in ss:
     ss.error_ct = 0
+
+if "num_turns" not in ss:
+    #new addition
+    ss.num_turns = 0
+
+def generate_unique_game_id():
+    new_game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    while check_game_id_exists_in_db(new_game_id):
+        new_game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    return new_game_id
+
+# Use this function to set ss.game_id when needed, not at the top level of your script
+if 'game_id' not in ss:
+    ss.game_id = generate_unique_game_id()
+
+if 'prompt_inserted' not in ss:
+    ss.prompt_inserted = False
     
 
 
@@ -82,13 +99,37 @@ def guess(name):
     ss.by_team[team].remove(name)
     ss.clicked[name] = not ss.clicked[name]
 
+    if(team=='Red'):
+        update_turn_after_guess(name, True)
+    else:
+        update_turn_after_guess(name, False)
+
     if not ss.guessed[team] and team != "Neutral":
+
+        #insert all the words into the db, along with whether they've been guessed or not
+        for key, val in ss.words_dict.items():
+            tm = teams[val]
+            if (key not in ss.by_team[tm]): #word has been guessed
+                insert_word(key, ss.game_id, tm, 1)
+            else: #word was not guessed, the value for the guessed column is 0 by default
+                insert_word(key, ss.game_id, tm)
+
+        prompt_id_guesser = get_prompt_id(ss.guesser_prompt, guesser=True)
+        prompt_id_cm = get_prompt_id(ss.cm_prompt, guesser=False)
+
         if team == "Red":
             ss.counters['Correct'] += 1
             ss.counters['Win'] += 1
+            insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=1)
+            update_prompt_after_win_loss(prompt_id_guesser, ss.game_id, True)
+            update_prompt_after_win_loss(prompt_id_cm, ss.game_id, True)
+            
         else:
             ss.counters['Incorrect'][team] += 1
             ss.counters['Loss'] += 1
+            insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=0)
+            update_prompt_after_win_loss(prompt_id_guesser, ss.game_id, False)
+            update_prompt_after_win_loss(prompt_id_cm, ss.game_id, False)
         ss.curr_dict = {}
         ss.game_started = False
         return True
@@ -127,6 +168,10 @@ def gvg():
                 try:
                     ss.clue, ss.cm_prompt = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
+                    
+                    if (ss.prompt_inserted == False):
+                        insert_prompt(ss.game_id, ss.cm_prompt, False)
+                        ss.prompt_inserted = True
                     ss.clue = ss.clue.split(">")
                     ss.words_to_guess = ss.clue[1]
                     ss.clue = json.loads(ss.clue[0])
@@ -143,12 +188,18 @@ def gvg():
                     print("debug clue: " + json.dumps(ss.clue))
                     print(e)
             ss.cm_logs.append(ss.clue)
+
+            insert_turn(ss.game_id, json.dumps(ss.by_team['Red']), json.dumps(ss.by_team['Blue']), json.dumps(ss.by_team['Neutral']), json.dumps(ss.by_team['Assassin']), ss.clue_word, ss.gs_left)
             ss.num_turns += 1
             
             ss.gs_logs.append([])
             while True: 
                 try:
                     ss.gs_array, ss.guesser_prompt = gen_guess(clue=ss.clue, board_words = json.dumps([key for key in ss.curr_dict.keys()]))
+                    #insert guesser prompt
+                    if (ss.prompt_inserted == False):
+                        insert_prompt(ss.game_id, ss.guesser_prompt, False)
+                        ss.prompt_inserted = True
                     ss.gs_array = json.loads(ss.gs_array)
                     for gs in ss.gs_array:
                         ss.curr_dict[gs] += 0
