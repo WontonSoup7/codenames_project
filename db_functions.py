@@ -177,7 +177,7 @@ def update_turn_trigger():
         conn.close()
     
 
-def update_turn_after_guess(guess, correct):
+def update_turn_after_guess(guess="", correct=True):
     conn = get_db_connection()
     #correct is whether the guess was correct or not
     #updated_clue_guesses is the updated array of clue guesses (as a string)
@@ -186,28 +186,31 @@ def update_turn_after_guess(guess, correct):
 
         c.execute("""SELECT MAX(ID) FROM TURN""")
         row = c.fetchone()
-        current_turn = row[0]
+        current_turn = row[0] if row else None
 
-        c.execute("""SELECT CLUE_GUESSES FROM TURN WHERE ID = ?""", (current_turn,))
-        row = c.fetchone()
-        updated_clue_guesses = json.loads(row[0]) if row and row[0] else []
-        updated_clue_guesses.append(guess)
-        updated_clue_guesses = json.dumps(updated_clue_guesses)
+        print(f"--------------\n ROW:  {row[0]} \n-------------------")
 
-        if correct:
-            conn.execute("""
-            UPDATE TURN
-            SET CLUE_GUESSES = ?, NUM_CORRECT = NUM_CORRECT + 1
-            WHERE ID = ?
-            """, (current_turn, updated_clue_guesses))
-        else:
-            #don't incrememnt num_correct because the guess was incorrect
-            conn.execute("""
-            UPDATE TURN
-            SET CLUE_GUESSES = ?
-            WHERE ID = ?
-            """, (current_turn, updated_clue_guesses))
-        conn.commit()
+        if current_turn:
+            c.execute("""SELECT CLUE_GUESSES FROM TURN WHERE ID = ?""", (current_turn,))
+            row = c.fetchone()
+            updated_clue_guesses = json.loads(row[0]) if row and row[0] else []
+            updated_clue_guesses.append(guess)
+            updated_clue_guesses = json.dumps(updated_clue_guesses)
+
+            if correct:
+                conn.execute("""
+                UPDATE TURN
+                SET CLUE_GUESSES = ?, NUM_CORRECT = NUM_CORRECT + 1
+                WHERE ID = ?
+                """, (updated_clue_guesses, current_turn))
+            else:
+                #don't incrememnt num_correct because the guess was incorrect
+                conn.execute("""
+                UPDATE TURN
+                SET CLUE_GUESSES = ?
+                WHERE ID = ?
+                """, (updated_clue_guesses, current_turn))
+            conn.commit()
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:

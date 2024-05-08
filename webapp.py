@@ -111,9 +111,11 @@ def guess(name):
     ss.clicked[name] = not ss.clicked[name]
 
     if(team=='Red'):
-        update_turn_after_guess(name, True)
+        update_turn_after_guess(guess=name, correct=True)
+        st.write("Update turn after guess: ", name)
     else:
-        update_turn_after_guess(name, False)
+        update_turn_after_guess(guess=name, correct=False)
+        st.write("Update turn after guess: ", name)
 
     if not ss.guessed[team] and team != "Neutral":
         toggle_board()
