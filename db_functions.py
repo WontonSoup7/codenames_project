@@ -320,12 +320,14 @@ def insert_prompt(game_id, prompt, guesser):
     #if guesser = 1, insert as guesser prompt, otherwise insert as cm prompt
     try:
         with conn:
+            game_ids = []
+            game_ids.append(game_id)
             if guesser:
                 if (get_prompt_id(prompt, guesser)==None): #if prompt doesn't already exist in db
-                    conn.execute("INSERT INTO PROMPT(GAMES, GUESSER_PROMPT) VALUES(?, ?)", (game_id, prompt))
+                    conn.execute("INSERT INTO PROMPT(GAMES, GUESSER_PROMPT) VALUES(?, ?)", (json.dumps(game_ids), prompt))
             else:
                 if (get_prompt_id(prompt, guesser)==None):
-                    conn.execute("INSERT INTO PROMPT(GAMES, CM_PROMPT) VALUES(?, ?)", (game_id, prompt))
+                    conn.execute("INSERT INTO PROMPT(GAMES, CM_PROMPT) VALUES(?, ?)", (json.dumps(game_id), prompt))
     finally:
         conn.close()
 
