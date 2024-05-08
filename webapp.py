@@ -133,7 +133,8 @@ def guess(name):
         prompt_data = fetch_all_prompts()
         st.text(prompt_data)
 
-        
+        if ("prompt_id" not in ss):
+            ss.prompt_id = ""
 
         for key, val in ss.words_dict.items():
             tm = teams[val]
@@ -144,19 +145,20 @@ def guess(name):
         if team == "Red":
             st.text("YOU WIN :)")
             insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=1)
-            if (ss.role == 0): #gpt as guesser
-                prompt_id = get_prompt_id(ss.guesser_prompt, guesser=True)
+            if ("guesser_prompt" in ss): #gpt as guesser
+                ss.prompt_id = get_prompt_id(ss.guesser_prompt, guesser=True)
             else:
-                prompt_id = get_prompt_id(ss.cm_prompt, guesser=False)
-            update_prompt_after_win_loss(prompt_id, ss.game_id, True)
+                ss.prompt_id = get_prompt_id(ss.cm_prompt, guesser=False)
+            update_prompt_after_win_loss(ss.prompt_id, ss.game_id, True)
         else:
             st.text("YOU LOSE :'(")
             insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=0)
             if (ss.role == 0): #gpt as guesser
-                prompt_id = get_prompt_id(ss.guesser_prompt, guesser=True)
+                ss.prompt_id = get_prompt_id(ss.guesser_prompt, guesser=True)
             else:
-                prompt_id = get_prompt_id(ss.cm_prompt, guesser=False)
-            update_prompt_after_win_loss(prompt_id, ss.game_id, False)
+                ss.prompt_id = get_prompt_id(ss.cm_prompt, guesser=False)
+            st.write("prompt id: ", ss.prompt_id)
+            update_prompt_after_win_loss(ss.prompt_id, ss.game_id, False)
 
         
         ss.curr_dict = {}

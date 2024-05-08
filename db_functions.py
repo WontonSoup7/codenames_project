@@ -78,6 +78,7 @@ def update_prompt_after_win_loss(prompt_id, game_id, win=True):
     try:
 
         c = conn.cursor()
+
         c.execute("""SELECT GAMES FROM PROMPT WHERE ID = ?""", (prompt_id,))
         row = c.fetchone()
         current_games = json.loads(row[0]) if row and row[0] else []
@@ -147,7 +148,7 @@ def get_prompt_id(prompt_text, guesser=True):
         else:
             c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ?""", (prompt_text,))
         id = c.fetchone()
-        return id
+        return id[0] if id else None
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
@@ -306,6 +307,7 @@ def get_prompt_id(prompt_text, guesser):
                 c.execute("""SELECT ID FROM PROMPT WHERE GUESSER_PROMPT = ?""", (prompt_text, ))
             else:
                 c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ?""", (prompt_text, ))
+            p = c.fetchone()[0]
             return p # will return None if the prompt does not exist in the table
     finally:
         conn.close()
