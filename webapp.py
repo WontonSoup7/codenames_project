@@ -23,6 +23,7 @@ conn = sqlite3.connect('codenames.db', timeout=60)
 c = conn.cursor()
 
 create_tables()
+add_triggers()
 
 ss = st.session_state
 # Dummy api calls for testing

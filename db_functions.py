@@ -60,7 +60,7 @@ def add_prompt_wl_ratio_trigger():
     conn = get_db_connection()
     try:
         conn.execute("""
-            CREATE TRIGGER update_wl_ratio AFTER UPDATE OF WINS, LOSSES ON PROMPT
+            CREATE TRIGGER IF NOT EXISTS update_wl_ratio AFTER UPDATE OF WINS, LOSSES ON PROMPT
             BEGIN
                 UPDATE PROMPT
                 SET WL_RATIO = CASE
@@ -340,3 +340,6 @@ def insert_turn(game_id, red_words, blue_words, neutral_words, assassin_words, c
     finally:
         conn.close()
 
+def add_triggers():
+    add_prompt_wl_ratio_trigger()
+    update_turn_trigger()
