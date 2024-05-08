@@ -101,7 +101,7 @@ def guess_word(clue, board_words):
     prompt = f"""
     From the words in the list {board_words}, determine the top {number} words that are closest to the word {word}, in terms of semantic meaning.
     For example, given the list of words ['SNOWMAN', 'KETCHUP', 'DATE', 'FALL', 'TURKEY', 'LITTER', 'EUROPE', 'CODE', 'PILOT', 'STRIKE', 'SUB', 'LASER', 'MISSILE', 'DRILL', 'CLIFF', 'HELICOPTER', 'CRASH', 'ROUND', 'TABLE', 'SEAL', 'AFRICA', 'KID', 'GHOST', 'RACKET', 'SPY'],
-    the top 2 words related to the word "continent" are 'EUROPE' and 'AFRICA' because both words refer to continents.
+    the top 2 words related to the word "continent" are 'EUROPE' and 'AFRICA' because both words refer to continents. So the output would be ['AFRICA', 'EUROPE'].
     Given the list of words  ['STAFF', 'TEMPLE', 'LION', 'CELL', 'PIN', 'BOTTLE', 'WAVE', 'GOLD', 'SCALE', 'ORGAN', 'FRANCE', 'SOLDIER', 'BOMB', 'HOSPITAL', 'LOCH NESS', 'SCORPION', 'GAME', 'PLASTIC', 'BOARD', 'KANGAROO', 'PALM', 'SINK', 'CARROT', 'TAG', 'WHIP'],
     the top 2 words related to the word "cage" are 'LION' and 'CELL'. 'Cage' is related to 'cell' because a cage and a cell are similar in that they are both enclosures meant to restrict movement and freedom
     'Cage' is related to 'lion' because lions are frequently kept in cages. So the output would be ['CELL', 'LION'].
