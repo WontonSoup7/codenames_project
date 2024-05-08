@@ -204,9 +204,6 @@ if ss.game_started:
                     ss.clue, ss.cm_prompt = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
                     #insert cm prompt
-                    if (ss.prompt_inserted == False):
-                        insert_prompt(ss.game_id, ss.cm_prompt, False)
-                        ss.prompt_inserted = True
                     ss.clue = ss.clue.split(">")
                     ss.words_to_guess = ss.clue[1]
                     ss.clue = json.loads(ss.clue[0])
@@ -221,6 +218,9 @@ if ss.game_started:
                 except Exception as e:
                     print(e)
                     pass
+            if (ss.prompt_inserted == False):
+                insert_prompt(ss.game_id, ss.cm_prompt, False)
+                ss.prompt_inserted = True
             print(ss.clue_word, ss.gs_left)
             ss.cm_logs.append(ss.clue)
 
@@ -264,9 +264,6 @@ def call_guesser():
         while True: 
             try:
                 ss.gs_array, ss.guesser_prompt = gen_guess(clue=ss.clue, board_words = json.dumps([key for key in ss.curr_dict.keys()]))
-                if (ss.prompt_inserted == False):
-                    insert_prompt(ss.game_id, ss.guesser_prompt, True)
-                    ss.prompt_inserted = True
                 ss.gs_array = json.loads(ss.gs_array)
                 for gs in ss.gs_array:
                     ss.curr_dict[gs] += 0
@@ -275,6 +272,9 @@ def call_guesser():
                 ss.user_input = ""
                 ss.gs_array = []
                 print(e)
+        if (ss.prompt_inserted == False):
+            insert_prompt(ss.game_id, ss.guesser_prompt, True)
+            ss.prompt_inserted = True
         for gs in ss.gs_array:
             if guess(gs):
                 break
