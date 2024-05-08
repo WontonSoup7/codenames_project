@@ -22,6 +22,7 @@ conn = sqlite3.connect('codenames.db', timeout=60)
 c = conn.cursor()
 
 create_tables()
+add_triggers()
 
 ss = st.session_state
 
@@ -80,11 +81,11 @@ def generate_unique_game_id():
     return new_game_id
 
 # Use this function to set ss.game_id when needed, not at the top level of your script
-if 'game_id' not in ss:
-    ss.game_id = generate_unique_game_id()
+# if 'game_id' not in ss:
+#     ss.game_id = generate_unique_game_id()
 
-if 'prompt_inserted' not in ss:
-    ss.prompt_inserted = False
+# if 'prompt_inserted' not in ss:
+#     ss.prompt_inserted = False
     
 
 
@@ -160,7 +161,18 @@ for i in range(len(ss.words)):
 ss.num_tests = st.slider(label="Number of Tests", min_value=1, max_value=30)
 def gvg():
     print("STARTING TESTING")
+
+
     for i in range(ss.num_tests):
+        ss.game_id = generate_unique_game_id()
+        ss.prompt_inserted = False
+        # #insert all the words into the db, along with whether they've been guessed or not
+        # for key, val in ss.words_dict.items():
+        #     tm = teams[val]
+        #     if (key not in ss.by_team[tm]): #word has been guessed
+        #         insert_word(key, ss.game_id, tm, 1)
+        #     else: #word was not guessed, the value for the guessed column is 0 by default
+        #         insert_word(key, ss.game_id, tm)
         print("GAME: " + str(i))
         ss.game_started = True
         while ss.game_started:
@@ -168,10 +180,6 @@ def gvg():
                 try:
                     ss.clue, ss.cm_prompt = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
-                    
-                    if (ss.prompt_inserted == False):
-                        insert_prompt(ss.game_id, ss.cm_prompt, False)
-                        ss.prompt_inserted = True
                     ss.clue = ss.clue.split(">")
                     ss.words_to_guess = ss.clue[1]
                     ss.clue = json.loads(ss.clue[0])
@@ -188,7 +196,9 @@ def gvg():
                     print("debug clue: " + json.dumps(ss.clue))
                     print(e)
             ss.cm_logs.append(ss.clue)
-
+            if (ss.prompt_inserted == False):
+                insert_prompt(ss.game_id, ss.cm_prompt, False)
+                ss.prompt_inserted = True
             insert_turn(ss.game_id, json.dumps(ss.by_team['Red']), json.dumps(ss.by_team['Blue']), json.dumps(ss.by_team['Neutral']), json.dumps(ss.by_team['Assassin']), ss.clue_word, ss.gs_left)
             ss.num_turns += 1
             
@@ -197,9 +207,6 @@ def gvg():
                 try:
                     ss.gs_array, ss.guesser_prompt = gen_guess(clue=ss.clue, board_words = json.dumps([key for key in ss.curr_dict.keys()]))
                     #insert guesser prompt
-                    if (ss.prompt_inserted == False):
-                        insert_prompt(ss.game_id, ss.guesser_prompt, False)
-                        ss.prompt_inserted = True
                     ss.gs_array = json.loads(ss.gs_array)
                     for gs in ss.gs_array:
                         ss.curr_dict[gs] += 0
@@ -210,6 +217,9 @@ def gvg():
                     print("Exception caught for guess")
                     print(ss.gs_array)
                     print(e)
+            if (ss.prompt_inserted == False):
+                insert_prompt(ss.game_id, ss.guesser_prompt, False)
+                ss.prompt_inserted = True
             for gs in ss.gs_array:
                 if guess(gs):
                     break

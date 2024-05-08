@@ -60,7 +60,7 @@ def add_prompt_wl_ratio_trigger():
     conn = get_db_connection()
     try:
         conn.execute("""
-            CREATE TRIGGER update_wl_ratio AFTER UPDATE OF WINS, LOSSES ON PROMPT
+            CREATE TRIGGER IF NOT EXISTS update_wl_ratio AFTER UPDATE OF WINS, LOSSES ON PROMPT
             BEGIN
                 UPDATE PROMPT
                 SET WL_RATIO = CASE
@@ -78,6 +78,7 @@ def update_prompt_after_win_loss(prompt_id, game_id, win=True):
     try:
 
         c = conn.cursor()
+
         c.execute("""SELECT GAMES FROM PROMPT WHERE ID = ?""", (prompt_id,))
         row = c.fetchone()
         current_games = json.loads(row[0]) if row and row[0] else []
@@ -147,7 +148,7 @@ def get_prompt_id(prompt_text, guesser=True):
         else:
             c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ?""", (prompt_text,))
         id = c.fetchone()
-        return id
+        return id[0] if id else None
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
@@ -176,7 +177,7 @@ def update_turn_trigger():
         conn.close()
     
 
-def update_turn_after_guess(guess, correct):
+def update_turn_after_guess(guess="", correct=True):
     conn = get_db_connection()
     #correct is whether the guess was correct or not
     #updated_clue_guesses is the updated array of clue guesses (as a string)
@@ -185,28 +186,31 @@ def update_turn_after_guess(guess, correct):
 
         c.execute("""SELECT MAX(ID) FROM TURN""")
         row = c.fetchone()
-        current_turn = row[0]
+        current_turn = row[0] if row else None
 
-        c.execute("""SELECT CLUE_GUESSES FROM TURN WHERE ID = ?""", (current_turn,))
-        row = c.fetchone()
-        updated_clue_guesses = json.loads(row[0]) if row and row[0] else []
-        updated_clue_guesses.append(guess)
-        updated_clue_guesses = json.dumps(updated_clue_guesses)
+        print(f"--------------\n ROW:  {row[0]} \n-------------------")
 
-        if correct:
-            conn.execute("""
-            UPDATE TURN
-            SET CLUE_GUESSES = ?, NUM_CORRECT = NUM_CORRECT + 1
-            WHERE ID = ?
-            """, (current_turn, updated_clue_guesses))
-        else:
-            #don't incrememnt num_correct because the guess was incorrect
-            conn.execute("""
-            UPDATE TURN
-            SET CLUE_GUESSES = ?
-            WHERE ID = ?
-            """, (current_turn, updated_clue_guesses))
-        conn.commit()
+        if current_turn:
+            c.execute("""SELECT CLUE_GUESSES FROM TURN WHERE ID = ?""", (current_turn,))
+            row = c.fetchone()
+            updated_clue_guesses = json.loads(row[0]) if row and row[0] else []
+            updated_clue_guesses.append(guess)
+            updated_clue_guesses = json.dumps(updated_clue_guesses)
+
+            if correct:
+                conn.execute("""
+                UPDATE TURN
+                SET CLUE_GUESSES = ?, NUM_CORRECT = NUM_CORRECT + 1
+                WHERE ID = ?
+                """, (updated_clue_guesses, current_turn))
+            else:
+                #don't incrememnt num_correct because the guess was incorrect
+                conn.execute("""
+                UPDATE TURN
+                SET CLUE_GUESSES = ?
+                WHERE ID = ?
+                """, (updated_clue_guesses, current_turn))
+            conn.commit()
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
@@ -234,6 +238,7 @@ def insert_game(game_id, num_turns=0, win=0):
     try:
         with conn:
             conn.execute("INSERT INTO GAME(ID, NUM_TURNS, WIN) VALUES(?, ?, ?)", (game_id, num_turns, win))
+            conn.commit()
     finally:
         conn.close()
 
@@ -306,6 +311,9 @@ def get_prompt_id(prompt_text, guesser):
                 c.execute("""SELECT ID FROM PROMPT WHERE GUESSER_PROMPT = ?""", (prompt_text, ))
             else:
                 c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ?""", (prompt_text, ))
+            p = c.fetchone()
+            if p:
+                p = p[0]
             return p # will return None if the prompt does not exist in the table
     finally:
         conn.close()
@@ -315,12 +323,13 @@ def insert_prompt(game_id, prompt, guesser):
     #if guesser = 1, insert as guesser prompt, otherwise insert as cm prompt
     try:
         with conn:
+            game_ids = [game_id]
             if guesser:
-                if (get_prompt_id(prompt, guesser)==None): #if prompt doesn't already exist in db
-                    conn.execute("INSERT INTO PROMPT(GAMES, GUESSER_PROMPT) VALUES(?, ?)", (game_id, prompt))
+                if (get_prompt_id(prompt, guesser) is None): #if prompt doesn't already exist in db
+                    conn.execute("INSERT INTO PROMPT(GAMES, GUESSER_PROMPT) VALUES(?, ?)", (json.dumps(game_ids), prompt))
             else:
-                if (get_prompt_id(prompt, guesser)==None):
-                    conn.execute("INSERT INTO PROMPT(GAMES, CM_PROMPT) VALUES(?, ?)", (game_id, prompt))
+                if (get_prompt_id(prompt, guesser) is None):
+                    conn.execute("INSERT INTO PROMPT(GAMES, CM_PROMPT) VALUES(?, ?)", (json.dumps(game_ids), prompt))
     finally:
         conn.close()
 
@@ -334,3 +343,6 @@ def insert_turn(game_id, red_words, blue_words, neutral_words, assassin_words, c
     finally:
         conn.close()
 
+def add_triggers():
+    add_prompt_wl_ratio_trigger()
+    update_turn_trigger()

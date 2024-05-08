@@ -52,14 +52,16 @@ def generate_clue(history, team_red_words, team_blue_words, neutral_words, assas
     # """
 
     prompt = f"""
-    From your list,{team_red_words}, give me a clue that represents some of the words from the list in some way. 
+    Give me a clue that represents some of the words from the list {team_red_words} in some way. 
     For example, for the word cards ‘beach’, ‘whale’, and ‘water’, one could give the clue ‘ocean’, as these things are all related to the ocean. 
     Also, give me a number that represents how many words in {team_red_words} match that clue. THE NUMBER MUST BE GREATER THAN 0! The single word clue must be related by meaning, so it cannot be purely phonetically or structurally related.
     The word clue cannot be a homonym for the word that the clue is for. For example, "knight" is not a valid clue for "night" because they are homonyms with completely different meaning.
-    The word clue also cannot be a part of the word that it's a clue for (or vice versa). For example, "hero" is not a valid clue for "suphero" (and vice versa).
+    The word clue also cannot be a part of the word that it's a clue for (or vice versa). For example, "hero" is an INVALID clue for "superhero" (and vice versa).
     Avoid a clue that may relate to this words: {team_blue_words}.
     Avoid a clue that relates to this words: {assassin_word}.
-    THE CLUE WORD MUST NOT BE A WORD DIRECTLY FROM {all_words}! 
+    THE CLUE WORD MUST NOT BE A WORD FROM {all_words}! 
+    THE CLUE MUST NOT CONTAIN ANY SPACES!
+    Try to avoid using previously used clues and come up with an original clue.
     Output(relationship_word, number) in tuple format. 
     Your response must be 1 line: one tuple.
     """

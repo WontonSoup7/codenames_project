@@ -16,6 +16,8 @@ st.title("Codenames")
 def clear_ss():
     for key in ss.keys():
         del ss[key]
+    if ("game_id" in ss):
+        ss.game_id = generate_unique_game_id()
 with st.columns([2, 1, 2])[1]:
     st.button("New Game", on_click=clear_ss)
 
@@ -23,6 +25,7 @@ conn = sqlite3.connect('codenames.db', timeout=60)
 c = conn.cursor()
 
 create_tables()
+add_triggers()
 
 ss = st.session_state
 # Dummy api calls for testing
@@ -110,32 +113,35 @@ def guess(name):
     ss.clicked[name] = not ss.clicked[name]
 
     if(team=='Red'):
-        update_turn_after_guess(name, True)
+        update_turn_after_guess(guess=name, correct=True)
+        st.write("Update turn after guess: ", name)
     else:
-        update_turn_after_guess(name, False)
+        update_turn_after_guess(guess=name, correct=False)
+        st.write("Update turn after guess: ", name)
 
     if not ss.guessed[team] and team != "Neutral":
         toggle_board()
 
-        #-------DATABASE TESTS--------
+        # #-------DATABASE TESTS--------
 
-        #JUST for test purposeses- delete these next lines (after this comment and before return) later
-        #c.execute("SELECT * FROM GAME")
-        #game_data = c.fetchall()
-        game_data = fetch_all_games()
-        st.title("GAME DATA")
-        st.text(game_data)
-        st.title("WORD DATA")
-        word_data = fetch_all_words()
-        st.text(word_data)
-        st.title("TURN DATA")
-        turn_data = fetch_all_turns()
-        st.text(turn_data)
-        st.title("PROMPT DATA")
-        prompt_data = fetch_all_prompts()
-        st.text(prompt_data)
+        # #JUST for test purposeses- delete these next lines (after this comment and before return) later
+        # #c.execute("SELECT * FROM GAME")
+        # #game_data = c.fetchall()
+        # game_data = fetch_all_games()
+        # st.title("GAME DATA")
+        # st.text(game_data)
+        # st.title("WORD DATA")
+        # word_data = fetch_all_words()
+        # st.text(word_data)
+        # st.title("TURN DATA")
+        # turn_data = fetch_all_turns()
+        # st.text(turn_data)
+        # st.title("PROMPT DATA")
+        # prompt_data = fetch_all_prompts()
+        # st.text(prompt_data)
 
-        
+        if ("prompt_id" not in ss):
+            ss.prompt_id = ""
 
         for key, val in ss.words_dict.items():
             tm = teams[val]
@@ -146,21 +152,22 @@ def guess(name):
         if team == "Red":
             st.text("YOU WIN :)")
             insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=1)
-            if (ss.role == 0): #gpt as guesser
-                prompt_id = get_prompt_id(ss.guesser_prompt, guesser=True)
+            if ("guesser_prompt" in ss): #gpt as guesser
+                ss.prompt_id = get_prompt_id(ss.guesser_prompt, guesser=True)
             else:
-                prompt_id = get_prompt_id(ss.cm_prompt, guesser=False)
-            update_prompt_after_win_loss(prompt_id, ss.game_id, True)
+                ss.prompt_id = get_prompt_id(ss.cm_prompt, guesser=False)
+            update_prompt_after_win_loss(ss.prompt_id, ss.game_id, True)
         else:
             st.text("YOU LOSE :'(")
             insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=0)
             if (ss.role == 0): #gpt as guesser
-                prompt_id = get_prompt_id(ss.guesser_prompt, guesser=True)
+                ss.prompt_id = get_prompt_id(ss.guesser_prompt, guesser=True)
             else:
-                prompt_id = get_prompt_id(ss.cm_prompt, guesser=False)
-            update_prompt_after_win_loss(prompt_id, ss.game_id, False)
+                ss.prompt_id = get_prompt_id(ss.cm_prompt, guesser=False)
+            st.write("prompt id: ", ss.prompt_id)
+            update_prompt_after_win_loss(ss.prompt_id, ss.game_id, False)
 
-        
+        #ss.game_id = generate_unique_game_id()
         ss.curr_dict = {}
         return True
     elif team != "Red":
@@ -204,9 +211,6 @@ if ss.game_started:
                     ss.clue, ss.cm_prompt = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
                                     ss.by_team['Neutral'], ss.by_team['Assassin'])
                     #insert cm prompt
-                    if (ss.prompt_inserted == False):
-                        insert_prompt(ss.game_id, ss.cm_prompt, False)
-                        ss.prompt_inserted = True
                     ss.clue = ss.clue.split(">")
                     ss.words_to_guess = ss.clue[1]
                     ss.clue = json.loads(ss.clue[0])
@@ -221,6 +225,9 @@ if ss.game_started:
                 except Exception as e:
                     print(e)
                     pass
+            if (ss.prompt_inserted == False):
+                insert_prompt(ss.game_id, ss.cm_prompt, False)
+                ss.prompt_inserted = True
             print(ss.clue_word, ss.gs_left)
             ss.cm_logs.append(ss.clue)
 
@@ -264,9 +271,6 @@ def call_guesser():
         while True: 
             try:
                 ss.gs_array, ss.guesser_prompt = gen_guess(clue=ss.clue, board_words = json.dumps([key for key in ss.curr_dict.keys()]))
-                if (ss.prompt_inserted == False):
-                    insert_prompt(ss.game_id, ss.guesser_prompt, True)
-                    ss.prompt_inserted = True
                 ss.gs_array = json.loads(ss.gs_array)
                 for gs in ss.gs_array:
                     ss.curr_dict[gs] += 0
@@ -275,6 +279,9 @@ def call_guesser():
                 ss.user_input = ""
                 ss.gs_array = []
                 print(e)
+        if (ss.prompt_inserted == False):
+            insert_prompt(ss.game_id, ss.guesser_prompt, True)
+            ss.prompt_inserted = True
         for gs in ss.gs_array:
             if guess(gs):
                 break
