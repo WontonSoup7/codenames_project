@@ -160,7 +160,7 @@ def guess(name):
             st.write("prompt id: ", ss.prompt_id)
             update_prompt_after_win_loss(ss.prompt_id, ss.game_id, False)
 
-        
+        ss.game_id = generate_unique_game_id()
         ss.curr_dict = {}
         return True
     elif team != "Red":
