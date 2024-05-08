@@ -307,7 +307,9 @@ def get_prompt_id(prompt_text, guesser):
                 c.execute("""SELECT ID FROM PROMPT WHERE GUESSER_PROMPT = ?""", (prompt_text, ))
             else:
                 c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ?""", (prompt_text, ))
-            p = c.fetchone()[0]
+            p = c.fetchone()
+            if p:
+                p = p[0]
             return p # will return None if the prompt does not exist in the table
     finally:
         conn.close()
