@@ -49,10 +49,15 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
         CIVILIAN WORDS={neutral_words}
         ASSASSIN={assassin_word}
         THE CLUE MUST AVOID INDICATING THE ASSASSIN WORD WHILE STRONGLY INDICATING HIGH RELATED RED WORDS AND EXTREMELY WEAKLY INDICATING BLUE AND CIVILIAN WORDS.
-        YOU MUST AVOID THE ASSASSIN WORD OR YOU INSTANTLY LOSE.
+        YOU MUST AVOID THE ASSASSIN WORD OR YOU LOSE YOUR JOB.
         THE CLUE NUMBER MAY NOT BE MORE THAN THE AMOUNT OF RED WORDS.
         YOUR CLUE MAY NOT HAVE APPEARED IN ANY OF THESE WORDS AND MUST BE ONE WORD ONLY.
         RETURN THE CLUE FOLLOWED BY A LIST OF THE RED TEAM WORDS: {red_words} THAT THE CLUE AIMS TO INDICATE.
+        The single word clue must be related by meaning, so it cannot be purely phonetically or structurally related. 
+        The clue word cannot be a homonym for the word that the clue is for. 
+        The clue word also cannot be a part of the word that it's a clue for (or vice versa). 
+        For example, "hero" is an INVALID clue for "superhero" (and vice versa).
+        Try to come up with an original clue.
         DO NOT RETURN ANYTHING ELSE.
     """
     usr_prompts = [
