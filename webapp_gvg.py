@@ -198,7 +198,6 @@ def gvg():
             ss.cm_logs.append(ss.clue)
             if (ss.prompt_inserted == False):
                 insert_prompt(ss.game_id, ss.cm_prompt, False)
-                ss.prompt_inserted = True
             insert_turn(ss.game_id, json.dumps(ss.by_team['Red']), json.dumps(ss.by_team['Blue']), json.dumps(ss.by_team['Neutral']), json.dumps(ss.by_team['Assassin']), ss.clue_word, ss.gs_left)
             ss.num_turns += 1
             
