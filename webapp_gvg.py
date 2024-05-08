@@ -222,11 +222,11 @@ def gvg():
                     print("Exception caught for guess")
                     print(ss.gs_array)
                     print(e)
-            if (ss.prompt_inserted == False):
-                #insert_turn(ss.game_id, json.dumps(ss.by_team['Red']), json.dumps(ss.by_team['Blue']), json.dumps(ss.by_team['Neutral']), json.dumps(ss.by_team['Assassin']), ss.clue_word, ss.gs_left)
-                #insert_prompt(ss.game_id, ss.guesser_prompt, False)
-                ss.prompt_id = update_row_for_guesser_prompt(ss.prompt_id, ss.game_id, ss.cm_prompt, ss.guesser_prompt)
-                ss.prompt_inserted = True
+            ss.prompt_id = update_row_for_guesser_prompt(ss.prompt_id, ss.game_id, ss.cm_prompt, ss.guesser_prompt)
+            # if (ss.prompt_inserted == False):
+            #     #insert_prompt(ss.game_id, ss.guesser_prompt, False)
+            #     ss.prompt_id = update_row_for_guesser_prompt(ss.prompt_id, ss.game_id, ss.cm_prompt, ss.guesser_prompt)
+            #     ss.prompt_inserted = True
             for gs in ss.gs_array:
                 if guess(gs):
                     break
