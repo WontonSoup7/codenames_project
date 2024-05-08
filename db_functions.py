@@ -235,6 +235,7 @@ def insert_game(game_id, num_turns=0, win=0):
     try:
         with conn:
             conn.execute("INSERT INTO GAME(ID, NUM_TURNS, WIN) VALUES(?, ?, ?)", (game_id, num_turns, win))
+            conn.commit()
     finally:
         conn.close()
 
