@@ -22,6 +22,7 @@ conn = sqlite3.connect('codenames.db', timeout=60)
 c = conn.cursor()
 
 create_tables()
+add_triggers()
 
 ss = st.session_state
 
@@ -106,13 +107,13 @@ def guess(name):
 
     if not ss.guessed[team] and team != "Neutral":
 
-        # #insert all the words into the db, along with whether they've been guessed or not
-        # for key, val in ss.words_dict.items():
-        #     tm = teams[val]
-        #     if (key not in ss.by_team[tm]): #word has been guessed
-        #         insert_word(key, ss.game_id, tm, 1)
-        #     else: #word was not guessed, the value for the guessed column is 0 by default
-        #         insert_word(key, ss.game_id, tm)
+        #insert all the words into the db, along with whether they've been guessed or not
+        for key, val in ss.words_dict.items():
+            tm = teams[val]
+            if (key not in ss.by_team[tm]): #word has been guessed
+                insert_word(key, ss.game_id, tm, 1)
+            else: #word was not guessed, the value for the guessed column is 0 by default
+                insert_word(key, ss.game_id, tm)
 
         prompt_id_guesser = get_prompt_id(ss.guesser_prompt, guesser=True)
         prompt_id_cm = get_prompt_id(ss.cm_prompt, guesser=False)
@@ -165,13 +166,13 @@ def gvg():
     for i in range(ss.num_tests):
         ss.game_id = generate_unique_game_id()
         ss.prompt_inserted = False
-        #insert all the words into the db, along with whether they've been guessed or not
-        for key, val in ss.words_dict.items():
-            tm = teams[val]
-            if (key not in ss.by_team[tm]): #word has been guessed
-                insert_word(key, ss.game_id, tm, 1)
-            else: #word was not guessed, the value for the guessed column is 0 by default
-                insert_word(key, ss.game_id, tm)
+        # #insert all the words into the db, along with whether they've been guessed or not
+        # for key, val in ss.words_dict.items():
+        #     tm = teams[val]
+        #     if (key not in ss.by_team[tm]): #word has been guessed
+        #         insert_word(key, ss.game_id, tm, 1)
+        #     else: #word was not guessed, the value for the guessed column is 0 by default
+        #         insert_word(key, ss.game_id, tm)
         print("GAME: " + str(i))
         ss.game_started = True
         while ss.game_started:
