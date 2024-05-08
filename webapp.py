@@ -14,6 +14,8 @@ st.title("Codenames")
 def clear_ss():
     for key in ss.keys():
         del ss[key]
+    if ("game_id" in ss):
+        ss.game_id = generate_unique_game_id()
 with st.columns([2, 1, 2])[1]:
     st.button("New Game", on_click=clear_ss)
 
@@ -160,7 +162,7 @@ def guess(name):
             st.write("prompt id: ", ss.prompt_id)
             update_prompt_after_win_loss(ss.prompt_id, ss.game_id, False)
 
-        ss.game_id = generate_unique_game_id()
+        #ss.game_id = generate_unique_game_id()
         ss.curr_dict = {}
         return True
     elif team != "Red":
