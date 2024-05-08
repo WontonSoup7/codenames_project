@@ -318,6 +318,22 @@ def get_prompt_id(prompt_text, guesser):
     finally:
         conn.close()
 
+def get_prompt_id_gvg(cm_prompt, guesser_prompt):
+    #if guesser = 1, check if the prompt text exists in the guesser column, else check if it exists in the cm column
+    conn = get_db_connection()
+    #if guesser = 1, insert as guesser prompt, otherwise insert as cm prompt
+    try:
+        with conn:
+            c = conn.cursor()
+            p = None
+            c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ? AND GUESSER_PROMPT = ?""", (cm_prompt, guesser_prompt))
+            p = c.fetchone()
+            if p:
+                p = p[0]
+            return p # will return None if the prompt does not exist in the table
+    finally:
+        conn.close()
+
 def insert_prompt(game_id, prompt, guesser):
     conn = get_db_connection()
     #if guesser = 1, insert as guesser prompt, otherwise insert as cm prompt
@@ -326,12 +342,40 @@ def insert_prompt(game_id, prompt, guesser):
             game_ids = [game_id]
             if guesser:
                 if (get_prompt_id(prompt, guesser) is None): #if prompt doesn't already exist in db
-                    conn.execute("INSERT INTO PROMPT(GAMES, GUESSER_PROMPT) VALUES(?, ?)", (json.dumps(game_ids), prompt))
+                    conn.execute("INSERT INTO PROMPT(GAMES, GUESSER_PROMPT) VALUES(?, ?)", (json.dumps(game_ids), prompt)) 
+                    return get_prompt_id(prompt, guesser)   
             else:
                 if (get_prompt_id(prompt, guesser) is None):
                     conn.execute("INSERT INTO PROMPT(GAMES, CM_PROMPT) VALUES(?, ?)", (json.dumps(game_ids), prompt))
+                    return get_prompt_id(prompt, guesser)
     finally:
         conn.close()
+
+def update_row_for_guesser_prompt(prompt_id, game_id, cm_prompt, guesser_prompt):
+    conn = get_db_connection()
+    try:
+        c = conn.cursor()
+        c.execute("""SELECT GUESSER_PROMPT FROM PROMPT WHERE ID = ? AND CM_PROMPT = ?""", (prompt_id, cm_prompt))
+        g_prompt = c.fetchone()
+            #if the guesser_prompt does not exist for the row with that prompt id, update it!
+        if (not g_prompt):
+            conn.execute("""
+            UPDATE PROMPT
+            SET GUESSER_PROMPT = ?
+            WHERE ID = ?
+                """, (guesser_prompt, prompt_id))
+            conn.commit()
+        #if there is a different guesser prompt in that row, create a new row with the cm_prompt and the guesser_prompt
+        else:
+            g_prompt = g_prompt[0]
+            if (g_prompt != guesser_prompt):
+                game_ids = [game_id]
+                conn.execute("""INSERT INTO PROMPT(CM_PROMPT, GAMES, GUESSER_PROMPT) VALUES(?, ?, ?)""", (cm_prompt, json.dumps(game_ids), guesser_prompt))
+                conn.commit()    
+        return get_prompt_id_gvg(cm_prompt, guesser_prompt)   
+    finally:
+        conn.close()
+
 
 def insert_turn(game_id, red_words, blue_words, neutral_words, assassin_words, clue_word, clue_num):
     conn = get_db_connection()

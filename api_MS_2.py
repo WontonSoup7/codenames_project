@@ -31,7 +31,7 @@ team_blue_words = random.sample([w for w in all_words if w not in team_red_words
 neutral_words = random.sample([w for w in all_words if (w not in team_red_words and w not in team_blue_words)], 8)
 assassin_word = random.sample([w for w in all_words if (w not in team_red_words and w not in team_blue_words and w not in neutral_words)], 1)
 
-# print("All: ", all_words)
+print("All: ", all_words)
 # print("Red: ", team_red_words)
 # print("Blue: ", team_blue_words)
 # print("Neutral: ", neutral_words)
@@ -96,7 +96,18 @@ def generate_clue(history, team_red_words, team_blue_words, neutral_words, assas
 
 def guess_word(clue, board_words):
     word, number = clue
-    prompt = f"This is the word list: {board_words}. Find {number} words that are relate to {word}. Output {number} words in python list format in one line. The {word} must not be on the output list. Sort the words in the list so the words that is mostly related to {word} comes first"
+    #prompt = f"This is the word list: {board_words}. Find {number} words that are relate to {word}. Output {number} words in python list format in one line. The {word} must not be on the output list. Sort the words in the list so the words that is mostly related to {word} comes first"
+
+    prompt = f"""
+    From the words in the list {board_words}, determine the top {number} words that are closest to the word {word}, in terms of semantic meaning.
+    For example, given the list of words ['SNOWMAN', 'KETCHUP', 'DATE', 'FALL', 'TURKEY', 'LITTER', 'EUROPE', 'CODE', 'PILOT', 'STRIKE', 'SUB', 'LASER', 'MISSILE', 'DRILL', 'CLIFF', 'HELICOPTER', 'CRASH', 'ROUND', 'TABLE', 'SEAL', 'AFRICA', 'KID', 'GHOST', 'RACKET', 'SPY'],
+    the top 2 words related to the word "continent" are 'EUROPE' and 'AFRICA' because both words refer to continents.
+    Given the list of words  ['STAFF', 'TEMPLE', 'LION', 'CELL', 'PIN', 'BOTTLE', 'WAVE', 'GOLD', 'SCALE', 'ORGAN', 'FRANCE', 'SOLDIER', 'BOMB', 'HOSPITAL', 'LOCH NESS', 'SCORPION', 'GAME', 'PLASTIC', 'BOARD', 'KANGAROO', 'PALM', 'SINK', 'CARROT', 'TAG', 'WHIP'],
+    the top 2 words related to the word "cage" are 'LION' and 'CELL'. 'Cage' is related to 'cell' because a cage and a cell are similar in that they are both enclosures meant to restrict movement and freedom
+    'Cage' is related to 'lion' because lions are frequently kept in cages. So the output would be ['CELL', 'LION'].
+    Output {number} words in python list format in one line. The word {word} must not be in the output list. Sort the words in the list in descending order of how closely related they are to the word {word}
+    """
+
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
@@ -284,5 +295,5 @@ def gpt_vs_user():
 #     print(generate_clue(team_red_words, team_blue_words, neutral_words, assassin_word))
 #     print()
 
-gpt_vs_user() 
-#gpt_vs_gpt()
+#gpt_vs_user() 
+gpt_vs_gpt()
