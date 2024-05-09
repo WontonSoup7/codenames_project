@@ -125,15 +125,17 @@ def guess(name):
             ss.counters['Correct'] += 1
             ss.counters['Win'] += 1
             insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=1)
-            update_prompt_after_win_loss(prompt_id_guesser, ss.game_id, True)
-            update_prompt_after_win_loss(prompt_id_cm, ss.game_id, True)
+            #update_prompt_after_win_loss(prompt_id_guesser, ss.game_id, True)
+            #update_prompt_after_win_loss(prompt_id_cm, ss.game_id, True)
+            update_prompt_after_win_loss(ss.prompt_id, ss.game_id, True)
             
         else:
             ss.counters['Incorrect'][team] += 1
             ss.counters['Loss'] += 1
             insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=0)
-            update_prompt_after_win_loss(prompt_id_guesser, ss.game_id, False)
-            update_prompt_after_win_loss(prompt_id_cm, ss.game_id, False)
+            #update_prompt_after_win_loss(prompt_id_guesser, ss.game_id, False)
+            #update_prompt_after_win_loss(prompt_id_cm, ss.game_id, False)
+            update_prompt_after_win_loss(ss.prompt_id, ss.game_id, False)
         ss.curr_dict = {}
         ss.game_started = False
         return True
@@ -202,7 +204,7 @@ def gvg():
             ss.cm_logs.append(ss.clue)
             if (ss.prompt_inserted == False):
                 insert_turn(ss.game_id, json.dumps(ss.by_team['Red']), json.dumps(ss.by_team['Blue']), json.dumps(ss.by_team['Neutral']), json.dumps(ss.by_team['Assassin']), ss.clue_word, ss.gs_left)
-                ss.prompt_id = insert_prompt(ss.game_id, ss.cm_prompt, False)
+                ss.prompt_id = insert_prompt_gvg(ss.game_id, ss.cm_prompt) #insert_prompt(ss.game_id, ss.cm_prompt, False)
                 ss.prompt_inserted = True
             
             ss.num_turns += 1
