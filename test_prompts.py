@@ -43,21 +43,19 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
     #         4. RETURN THE CLUE FOLLOWED BY A LIST OF THE RED TEAM WORDS THAT THE CLUE AIMS TO INDICATE.
     #     """
     prompt = """
-        YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME
+        YOU ARE NOW THE RED SPYMASTER IN A CODENAMES GAME
         RED WORDS={red_words}
         BLUE WORDS={blue_words}
         CIVILIAN WORDS={neutral_words}
         ASSASSIN={assassin_word}
         THE CLUE MUST AVOID INDICATING THE ASSASSIN WORD WHILE STRONGLY INDICATING HIGH RELATED RED WORDS AND EXTREMELY WEAKLY INDICATING BLUE AND CIVILIAN WORDS.
-        YOU MUST AVOID THE ASSASSIN WORD OR YOU LOSE YOUR JOB.
+        THE CLUE MUST AVOID INDICATING THE ASSASSIN WORD OR YOU LOSE YOUR JOB.
         THE CLUE NUMBER MAY NOT BE MORE THAN THE AMOUNT OF RED WORDS.
         YOUR CLUE MAY NOT HAVE APPEARED IN ANY OF THESE WORDS AND MUST BE ONE WORD ONLY.
         RETURN THE CLUE FOLLOWED BY A LIST OF THE RED TEAM WORDS: {red_words} THAT THE CLUE AIMS TO INDICATE.
-        The single word clue must be related by meaning, so it cannot be purely phonetically or structurally related. 
-        The clue word cannot be a homonym for the word that the clue is for. 
-        The clue word also cannot be a part of the word that it's a clue for (or vice versa). 
-        For example, "hero" is an INVALID clue for "superhero" (and vice versa).
-        Try to come up with an original clue.
+        THE SINGLE WORD CLUE MUST BE RELATED BY MEANING, SO IT CANNOT BE PURELY PHONETICALLY OR STRUCTURALLY RELATED.
+        THE CLUE WORD CANNOT BE A HOMONYM FOR THE WORD THAT THE CLUE IS FOR.
+        THE CLUE WORD ALSO CANNOT BE A PART OF THE WORD THAT IT'S A CLUE FOR (OR VICE VERSA).
         DO NOT RETURN ANYTHING ELSE.
     """
     usr_prompts = [
@@ -190,6 +188,7 @@ def gen_guess(clue, board_words):
     EACH GUESS MUST BE IN THIS LIST OF WORDS: {board_words}
     THERE MUST BE {clue[1]} NUMBER OF GUESSES.
     THE GUESSES MUST BE ORDERED FROM YOUR BEST GUESS TO YOUR WORST GUESS.
+    THINK DEEP AND HARD ABOUT YOUR GUESSES; GUESSING INCORRECT WORDS COULD RESULT IN LOSING YOUR JOB.
     THE NUMBER OF GUESSES MUST MATCH THE NUMBER PROVIDED IN THE CLUE.
     DO NOT RETURN ANYTHING ELSE BESIDES YOUR ARRAY OF GUESSES.
     NONE OF THE GUESSES CAN BE {clue[0]}.
