@@ -308,9 +308,9 @@ def get_prompt_id(prompt_text, guesser):
             c = conn.cursor()
             p = None
             if guesser:
-                c.execute("""SELECT ID FROM PROMPT WHERE GUESSER_PROMPT = ? AND CM_PROMPT = ?""", (prompt_text, None))
+                c.execute("""SELECT ID FROM PROMPT WHERE GUESSER_PROMPT = ? AND CM_PROMPT IS NULL""", (prompt_text, ))
             else:
-                c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ? AND GUESSER_PROMPT = ?""", (prompt_text, None))
+                c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ? AND GUESSER_PROMPT IS NULL""", (prompt_text, ))
             p = c.fetchone()
             if p:
                 p = p[0]
@@ -318,7 +318,7 @@ def get_prompt_id(prompt_text, guesser):
     finally:
         conn.close()
 
-def get_prompt_id_gvg(cm_prompt, guesser_prompt):
+def get_prompt_id_gvg(cm_prompt, guesser_prompt=None):
     #if guesser = 1, check if the prompt text exists in the guesser column, else check if it exists in the cm column
     conn = get_db_connection()
     #if guesser = 1, insert as guesser prompt, otherwise insert as cm prompt
@@ -326,7 +326,10 @@ def get_prompt_id_gvg(cm_prompt, guesser_prompt):
         with conn:
             c = conn.cursor()
             p = None
-            c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ? AND GUESSER_PROMPT = ?""", (cm_prompt, guesser_prompt))
+            if guesser_prompt:
+                c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ? AND GUESSER_PROMPT = ?""", (cm_prompt, guesser_prompt))
+            else:
+                c.execute("""SELECT ID FROM PROMPT WHERE CM_PROMPT = ? AND GUESSER_PROMPT IS NOT NULL""", (cm_prompt, ))
             p = c.fetchone()
             if p:
                 p = p[0]
@@ -342,12 +345,12 @@ def insert_prompt(game_id, prompt, guesser):
             game_ids = [game_id]
             if guesser:
                 if (get_prompt_id(prompt, guesser) == None): #if prompt doesn't already exist in db
-                    conn.execute("INSERT INTO PROMPT(GAMES, GUESSER_PROMPT) VALUES(?, ?)", (json.dumps(game_ids), prompt)) 
+                    conn.execute("INSERT INTO PROMPT(GAMES, GUESSER_PROMPT, CM_PROMPT) VALUES(?, ?, NULL)", (json.dumps(game_ids), prompt)) 
                     conn.commit()
                     return get_prompt_id(prompt, guesser)   
             else:
                 if (get_prompt_id(prompt, guesser) == None):
-                    conn.execute("INSERT INTO PROMPT(GAMES, CM_PROMPT) VALUES(?, ?)", (json.dumps(game_ids), prompt))
+                    conn.execute("INSERT INTO PROMPT(GAMES, CM_PROMPT, GUESSER_PROMPT) VALUES(?, ?, NULL)", (json.dumps(game_ids), prompt))
                     conn.commit()
                     return get_prompt_id(prompt, guesser)
     finally:
@@ -358,7 +361,7 @@ def insert_prompt_gvg(game_id, cm_prompt, guesser_prompt=None):
     try:
         with conn:
             game_ids = [game_id]
-            if ((guesser_prompt==None) and (get_prompt_id_gvg(cm_prompt, 'x')==None)):
+            if ((guesser_prompt==None) and (get_prompt_id_gvg(cm_prompt)==None)):
                 conn.execute("INSERT INTO PROMPT(GAMES, CM_PROMPT, GUESSER_PROMPT) VALUES (?, ?, ?)", (json.dumps(game_ids), cm_prompt, 'x'))
                 conn.commit()
                 return get_prompt_id_gvg(cm_prompt, 'x')
