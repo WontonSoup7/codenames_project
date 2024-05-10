@@ -79,12 +79,26 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
             "neutral_words": ["BOLT", "MOSCOW", "APPLE", "COTTON", "SPINE", "DISEASE", "SERVER"],
             "assassin_word": ["SKYSCRAPER"]
         },
+        {
+            "red_words" : ["WALL", "WASHINGTON", "RABBIT", "GIANT", "ICE CREAM", "TOOTH", "HONEY", "NEEDLE"],
+            "blue_words" : ["MASS", "CHURCH", "HORSESHOE", "SHADOW", "KING", "CIRCLE", "TRACK"],
+            "neutral_words" : ["SCHOOL", "WAR", "SOUND", "TAP", "NURSE", "MOON", "ROOT", "NIGHT", "TABLET"],
+            "assassin_word" : ["NINJA"]
+        },
+        {
+            "red_words" : ["MOUTH", "TELESCOPE", "ALPS", "HOSPITAL", "DRILL", "OLYMPUS", "GAME", "MOUNT"],
+            "blue_words" : ["MATCH", "HORSE", "TURKEY", "CHEST", "SCHOOL", "PIT", "FIRE"],
+            "neutral_words" : ["FILE", "CRASH", "ORANGE", "CRICKET", "SCORPION", "PLOT", "BANK", "CARROT", "ROME"],
+            "assassin_word" : ["PLATE"]
+        }
     ]
 
     outputs = [
         '["LOUD", 4]>(BOMB, OPERA, PISTOL, BARK)',
         '["USSR", 2]>(COLD, WAR)',
         '["CHRISTMAS", 3]>(ANGEL, STAR, BOX)',
+        '["SWEET", 2]>(HONEY, ICE CREAM)',
+        '["SUMMIT", 3]>(MOUNT, ALPS, OLYMPUS)'
     ]
 
     replacements = {
