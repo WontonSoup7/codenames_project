@@ -254,6 +254,18 @@ def gen_guess(clue, board_words):
                 "CALF", "RABBIT", "SPINE", "ARM", 
                 "SCREEN", "LITTER", "DATE", "SHOE", "BUFFALO"]""",
                 'clue':["MEDICINE", 2]
+            },
+            {
+                'board_words' : """["WALL", "WASHINGTON", "RABBIT", "GIANT", "ICE CREAM", "TOOTH", "HONEY", "NEEDLE",
+                "MASS", "CHURCH", "HORSESHOE", "SHADOW", "KING", "CIRCLE", "TRACK", 
+                "SCHOOL", "WAR", "SOUND", "TAP", "NURSE", "MOON", "ROOT", "NIGHT", "TABLET", "NINJA"]""",
+                'clue':["SWEET", 2]
+            },
+            {
+                'board_words' : """["MOUTH", "TELESCOPE", "ALPS", "HOSPITAL", "DRILL", "OLYMPUS", "GAME", "MOUNT",
+                "MATCH", "HORSE", "TURKEY", "CHEST", "SCHOOL", "PIT", "FIRE", "PLATE",
+                "FILE", "CRASH", "ORANGE", "CRICKET", "SCORPION", "PLOT", "BANK", "CARROT", "ROME"
+                ]"""
             }
         ]
 
@@ -264,6 +276,8 @@ def gen_guess(clue, board_words):
         '["BEACH", "PIRATE"]',
         '["PLATE", "BERRY", "TURKEY", "MINT"]'
         '["AMBULANCE", "BOTTLE"]'
+        '["HONEY", "ICE CREAM"]'
+        '["MOUNT", "ALPS", "OLYMPUS"]'
     ]
     replacements = {
         'clue' : clue,
