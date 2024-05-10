@@ -230,12 +230,40 @@ def gen_guess(clue, board_words):
                 'COPPER', 'STAR', 'SWITCH', 'PARK']""",
                 'clue':["CHRISTMAS", 3]
             },
+            {
+                'board_words' : """["PIRATE", "SUIT", "OLYMPUS", "KNIFE", 
+                "BEACH", "HEAD", "BALL", "SCORPION", "HOLLYWOOD", "HORSESHOE", 
+                "BUCK", "TOOTH", "CYCLE", "MAPLE", "SKYSCRAPER", "VET", 
+                "BATTERY", "FILM", "CLOAK", "CHECK", 
+                "SHAKESPEARE", "MILLIONAIRE", "MUG", "BOOT", "FOREST"]""",
+                'clue':["ISLAND", 2]
+            },
+            {
+                'board_words' : """["TURKEY", "SLUG", "WORM", "PLATE",
+                "BERRY", "MINT", "FIGHTER", "CONDUCTOR",
+                "LOCK", "LINE", "CRICKET", "CAST", "PLOT",
+                "THUMB", "SHOE", "CANADA", "LIFE", "NAIL", "TOWER",
+                "SPACE", "EMBASSY", "AIR", "STREAM", "PART", "JACK"]""",
+                'clue':["RECIPE", 4]            
+            },
+            {
+                'board_words' : """["SMUGGLER", "RING", "NOVEL", "FLUTE",
+                "WITCH", "AMBULANCE", "BOTTLE", "HAND",
+                "MAIL", "GIANT", "HORSESHOE", "GRASS", 
+                "KANGAROO", "PASTE", "COMIC", "CASINO", 
+                "CALF", "RABBIT", "SPINE", "ARM", 
+                "SCREEN", "LITTER", "DATE", "SHOE", "BUFFALO"]""",
+                'clue':["MEDICINE", 2]
+            }
         ]
 
     outputs = [
         '["BOMB", "OPERA", "PISTOL", "BARK"]',
         '["COLD", "WAR"]',
         '["ANGEL", "STAR", "BOX"]',
+        '["BEACH", "PIRATE"]',
+        '["PLATE", "BERRY", "TURKEY", "MINT"]'
+        '["AMBULANCE", "BOTTLE"]'
     ]
     replacements = {
         'clue' : clue,
