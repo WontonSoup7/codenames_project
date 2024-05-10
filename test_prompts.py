@@ -77,12 +77,26 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
             "neutral_words": ["BOLT", "MOSCOW", "APPLE", "COTTON", "SPINE", "DISEASE", "SERVER"],
             "assassin_word": ["SKYSCRAPER"]
         },
+        {
+            "red_words" : ["WALL", "WASHINGTON", "RABBIT", "GIANT", "ICE CREAM", "TOOTH", "HONEY", "NEEDLE"],
+            "blue_words" : ["MASS", "CHURCH", "HORSESHOE", "SHADOW", "KING", "CIRCLE", "TRACK"],
+            "neutral_words" : ["SCHOOL", "WAR", "SOUND", "TAP", "NURSE", "MOON", "ROOT", "NIGHT", "TABLET"],
+            "assassin_word" : ["NINJA"]
+        },
+        {
+            "red_words" : ["MOUTH", "TELESCOPE", "ALPS", "HOSPITAL", "DRILL", "OLYMPUS", "GAME", "MOUNT"],
+            "blue_words" : ["MATCH", "HORSE", "TURKEY", "CHEST", "SCHOOL", "PIT", "FIRE"],
+            "neutral_words" : ["FILE", "CRASH", "ORANGE", "CRICKET", "SCORPION", "PLOT", "BANK", "CARROT", "ROME"],
+            "assassin_word" : ["PLATE"]
+        }
     ]
 
     outputs = [
         '["LOUD", 4]>(BOMB, OPERA, PISTOL, BARK)',
         '["USSR", 2]>(COLD, WAR)',
         '["CHRISTMAS", 3]>(ANGEL, STAR, BOX)',
+        '["SWEET", 2]>(HONEY, ICE CREAM)',
+        '["SUMMIT", 3]>(MOUNT, ALPS, OLYMPUS)'
     ]
 
     replacements = {
@@ -215,12 +229,54 @@ def gen_guess(clue, board_words):
                 'COPPER', 'STAR', 'SWITCH', 'PARK']""",
                 'clue':["CHRISTMAS", 3]
             },
+            {
+                'board_words': """["PIRATE", "SUIT", "OLYMPUS", "KNIFE", 
+                "BEACH", "HEAD", "BALL", "SCORPION", "HOLLYWOOD", "HORSESHOE", 
+                "BUCK", "TOOTH", "CYCLE", "MAPLE", "SKYSCRAPER", "VET", 
+                "BATTERY", "FILM", "CLOAK", "CHECK", 
+                "SHAKESPEARE", "MILLIONAIRE", "MUG", "BOOT", "FOREST"]""",
+                'clue':["ISLAND", 2]
+            },
+            {
+                'board_words': """["TURKEY", "SLUG", "WORM", "PLATE",
+                "BERRY", "MINT", "FIGHTER", "CONDUCTOR",
+                "LOCK", "LINE", "CRICKET", "CAST", "PLOT",
+                "THUMB", "SHOE", "CANADA", "LIFE", "NAIL", "TOWER",
+                "SPACE", "EMBASSY", "AIR", "STREAM", "PART", "JACK"]""",
+                'clue':["RECIPE", 4]            
+            },
+            {
+                'board_words': """["SMUGGLER", "RING", "NOVEL", "FLUTE",
+                "WITCH", "AMBULANCE", "BOTTLE", "HAND",
+                "MAIL", "GIANT", "HORSESHOE", "GRASS", 
+                "KANGAROO", "PASTE", "COMIC", "CASINO", 
+                "CALF", "RABBIT", "SPINE", "ARM", 
+                "SCREEN", "LITTER", "DATE", "SHOE", "BUFFALO"]""",
+                'clue':["MEDICINE", 2]
+            },
+            {
+                'board_words': """["WALL", "WASHINGTON", "RABBIT", "GIANT", "ICE CREAM", "TOOTH", "HONEY", "NEEDLE",
+                "MASS", "CHURCH", "HORSESHOE", "SHADOW", "KING", "CIRCLE", "TRACK", 
+                "SCHOOL", "WAR", "SOUND", "TAP", "NURSE", "MOON", "ROOT", "NIGHT", "TABLET", "NINJA"]""",
+                'clue':["SWEET", 2]
+            },
+            {
+                'board_words': """["MOUTH", "TELESCOPE", "ALPS", "HOSPITAL", "DRILL", "OLYMPUS", "GAME", "MOUNT",
+                "MATCH", "HORSE", "TURKEY", "CHEST", "SCHOOL", "PIT", "FIRE", "PLATE",
+                "FILE", "CRASH", "ORANGE", "CRICKET", "SCORPION", "PLOT", "BANK", "CARROT", "ROME"
+                ]"""
+            }
         ]
 
     outputs = [
         '["BOMB", "OPERA", "PISTOL", "BARK"]',
         '["COLD", "WAR"]',
         '["ANGEL", "STAR", "BOX"]',
+        '["BEACH", "PIRATE"]',
+        '["PLATE", "BERRY", "TURKEY", "MINT"]',
+        '["AMBULANCE", "BOTTLE"]',
+        '["HONEY", "ICE CREAM"]',
+        '["MOUNT", "ALPS", "OLYMPUS"]',
     ]
     replacements = {
         'clue' : clue,

@@ -74,6 +74,9 @@ if "num_turns" not in ss:
     #new addition
     ss.num_turns = 0
 
+if "prompt_id" not in ss:
+    ss.prompt_id = 1
+
 def generate_unique_game_id():
     new_game_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
     while check_game_id_exists_in_db(new_game_id):
@@ -122,15 +125,17 @@ def guess(name):
             ss.counters['Correct'] += 1
             ss.counters['Win'] += 1
             insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=1)
-            update_prompt_after_win_loss(prompt_id_guesser, ss.game_id, True)
-            update_prompt_after_win_loss(prompt_id_cm, ss.game_id, True)
+            #update_prompt_after_win_loss(prompt_id_guesser, ss.game_id, True)
+            #update_prompt_after_win_loss(prompt_id_cm, ss.game_id, True)
+            update_prompt_after_win_loss(ss.prompt_id, ss.game_id, True)
             
         else:
             ss.counters['Incorrect'][team] += 1
             ss.counters['Loss'] += 1
             insert_game(game_id=ss.game_id, num_turns=ss.num_turns, win=0)
-            update_prompt_after_win_loss(prompt_id_guesser, ss.game_id, False)
-            update_prompt_after_win_loss(prompt_id_cm, ss.game_id, False)
+            #update_prompt_after_win_loss(prompt_id_guesser, ss.game_id, False)
+            #update_prompt_after_win_loss(prompt_id_cm, ss.game_id, False)
+            update_prompt_after_win_loss(ss.prompt_id, ss.game_id, False)
         ss.curr_dict = {}
         ss.game_started = False
         return True
@@ -144,6 +149,7 @@ def do_nothing(name):
 
 if "game_started" not in ss:
     ss.game_started = True
+    
 
 def do_nothing(name):
     pass
@@ -197,8 +203,10 @@ def gvg():
                     print(e)
             ss.cm_logs.append(ss.clue)
             if (ss.prompt_inserted == False):
-                insert_prompt(ss.game_id, ss.cm_prompt, False)
-            insert_turn(ss.game_id, json.dumps(ss.by_team['Red']), json.dumps(ss.by_team['Blue']), json.dumps(ss.by_team['Neutral']), json.dumps(ss.by_team['Assassin']), ss.clue_word, ss.gs_left)
+                insert_turn(ss.game_id, json.dumps(ss.by_team['Red']), json.dumps(ss.by_team['Blue']), json.dumps(ss.by_team['Neutral']), json.dumps(ss.by_team['Assassin']), ss.clue_word, ss.gs_left)
+                ss.prompt_id = insert_prompt_gvg(ss.game_id, ss.cm_prompt) #insert_prompt(ss.game_id, ss.cm_prompt, False)
+                ss.prompt_inserted = True
+            
             ss.num_turns += 1
             
             ss.gs_logs.append([])
@@ -216,9 +224,11 @@ def gvg():
                     print("Exception caught for guess")
                     print(ss.gs_array)
                     print(e)
-            if (ss.prompt_inserted == False):
-                insert_prompt(ss.game_id, ss.guesser_prompt, False)
-                ss.prompt_inserted = True
+            ss.prompt_id = update_row_for_guesser_prompt(ss.prompt_id, ss.game_id, ss.cm_prompt, ss.guesser_prompt)
+            # if (ss.prompt_inserted == False):
+            #     #insert_prompt(ss.game_id, ss.guesser_prompt, False)
+            #     ss.prompt_id = update_row_for_guesser_prompt(ss.prompt_id, ss.game_id, ss.cm_prompt, ss.guesser_prompt)
+            #     ss.prompt_inserted = True
             for gs in ss.gs_array:
                 if guess(gs):
                     break
