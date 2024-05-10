@@ -111,13 +111,10 @@ def guess(name):
     del ss.curr_dict[name]
     ss.by_team[team].remove(name)
     ss.clicked[name] = not ss.clicked[name]
-
     if(team=='Red'):
         update_turn_after_guess(guess=name, correct=True)
-        st.write("Update turn after guess: ", name)
     else:
         update_turn_after_guess(guess=name, correct=False)
-        st.write("Update turn after guess: ", name)
 
     if not ss.guessed[team] and team != "Neutral":
         toggle_board()
@@ -296,6 +293,7 @@ txt_input = st.text_input(label= "Enter Clue",
     label_visibility="collapsed",
     placeholder= "Word: Number",
     disabled=ss.disable_user_input,
+    autocomplete="off",
     on_change=call_guesser)
 
 if "clue" in ss and ss.curr_dict:
@@ -304,21 +302,28 @@ if "clue" in ss and ss.curr_dict:
 elif "role" in ss and not ss.role:
     st.text("Please enter a clue")
 
+colors = {"Red":"red", "Blue":"blue", "Neutral":"grey", "Assassin":"rainbow"}
 # GAME BOARD
 cols = st.columns(5)
 for i in range(len(ss.words)):
     with(cols[i // 5]):
         name = ss.words[i]
-        st.button(label=name, key=name, 
+        label = name
+        if 'role' in ss and not ss.role and not ss.clicked[name]:
+            color = colors[teams[ss.words_dict[name]]]
+            print(color)
+            label = ":{color}[{name}]".format(color = color, name = name)
+        st.button(label=label, key=name, 
                   on_click=bt_guess, args=[name],
-                  disabled=ss.clicked[name])
+                  disabled=ss.clicked[name],
+                  use_container_width=True
+                  )
 
 st.write(ss.guessed)
 # REVEAL TEAMS   
-rev_teams = st.checkbox(label="Teams", value=True)
-if rev_teams: 
+if 'role' in ss and not ss.role:
     for key, val in ss.by_team.items():
-        st.text(key + ": " + json.dumps(val))
+        st.text(("{key}({color}): {val}").format(color=colors[key], val=val, key = key))
 
 for i in range(len(ss.cm_logs)):
     st.text("Clue: ")
