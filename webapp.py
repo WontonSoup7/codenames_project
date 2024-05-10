@@ -112,34 +112,10 @@ def guess(name):
     ss.by_team[team].remove(name)
     ss.clicked[name] = not ss.clicked[name]
 
-    if(team=='Red'):
-        update_turn_after_guess(guess=name, correct=True)
-        st.write("Update turn after guess: ", name)
-    else:
-        update_turn_after_guess(guess=name, correct=False)
-        st.write("Update turn after guess: ", name)
-
     if not ss.guessed[team] and team != "Neutral":
         toggle_board()
 
-        # #-------DATABASE TESTS--------
-
-        #JUST for test purposeses- delete these next lines (after this comment and before return) later
-        #c.execute("SELECT * FROM GAME")
-        #game_data = c.fetchall()
-        game_data = fetch_all_games()
-        st.title("GAME DATA")
-        st.text(game_data)
-        st.title("WORD DATA")
-        word_data = fetch_all_words()
-        st.text(word_data)
-        st.title("TURN DATA")
-        turn_data = fetch_all_turns()
-        st.text(turn_data)
-        st.title("PROMPT DATA")
-        prompt_data = fetch_all_prompts()
-        st.text(prompt_data)
-
+        
         if ("prompt_id" not in ss):
             ss.prompt_id = ""
 
@@ -164,7 +140,6 @@ def guess(name):
                 ss.prompt_id = get_prompt_id(ss.guesser_prompt, guesser=True)
             else:
                 ss.prompt_id = get_prompt_id(ss.cm_prompt, guesser=False)
-            st.write("prompt id: ", ss.prompt_id)
             update_prompt_after_win_loss(ss.prompt_id, ss.game_id, False)
 
         #ss.game_id = generate_unique_game_id()
@@ -313,7 +288,7 @@ for i in range(len(ss.words)):
                   on_click=bt_guess, args=[name],
                   disabled=ss.clicked[name])
 
-st.write(ss.guessed)
+#st.write(ss.guessed)
 # REVEAL TEAMS   
 rev_teams = st.checkbox(label="Teams", value=True)
 if rev_teams: 
