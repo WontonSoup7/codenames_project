@@ -185,7 +185,7 @@ def gvg():
             while True:
                 try:
                     ss.clue, ss.cm_prompt = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
-                                    ss.by_team['Neutral'], ss.by_team['Assassin'])
+                                    ss.by_team['Neutral'], ss.by_team['Assassin'], prev_clues=ss.cm_logs)
                     ss.clue = ss.clue.split(">")
                     ss.words_to_guess = ss.clue[1]
                     ss.clue = json.loads(ss.clue[0])

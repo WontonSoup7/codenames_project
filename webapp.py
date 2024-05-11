@@ -184,7 +184,7 @@ if ss.game_started:
             while True:
                 try:
                     ss.clue, ss.cm_prompt = gen_clue(ss.by_team['Red'], ss.by_team['Blue'],
-                                    ss.by_team['Neutral'], ss.by_team['Assassin'])
+                        ss.by_team['Neutral'], ss.by_team['Assassin'], ss.cm_logs)
                     #insert cm prompt
                     ss.clue = ss.clue.split(">")
                     ss.words_to_guess = ss.clue[1]
@@ -269,7 +269,7 @@ def call_guesser():
 txt_input = st.text_input(label= "Enter Clue",
     key = "user_input",
     label_visibility="collapsed",
-    placeholder= "Word: Number",
+    placeholder= "Word: Guesses",
     disabled=ss.disable_user_input,
     autocomplete="off",
     on_change=call_guesser)
@@ -278,30 +278,30 @@ if "clue" in ss and ss.curr_dict:
     st.text(ss.clue_word + ": " + str(ss.clue[1])) 
     st.text("Guesses remaining: " + str(ss.gs_left))
 elif "role" in ss and not ss.role:
-    st.text("Please enter a clue")
+    st.text("Please enter a clue formatted as WORD: GUESSES")
 
-colors = {"Red":"red", "Blue":"blue", "Neutral":"grey", "Assassin":"rainbow"}
+colors = {"Red":"red", "Blue":"blue", "Neutral":"green", "Assassin":"rainbow"}
 # GAME BOARD
 cols = st.columns(5)
 for i in range(len(ss.words)):
     with(cols[i // 5]):
         name = ss.words[i]
         label = name
-        if 'role' in ss and not ss.role and not ss.clicked[name]:
-            color = colors[teams[ss.words_dict[name]]]
-            print(color)
-            label = ":{color}[{name}]".format(color = color, name = name)
+        if 'role' in ss:
+            if not ss.role and not ss.clicked[name] or ss.role and ss.clicked[name]:
+                color = colors[teams[ss.words_dict[name]]]
+                label = ":{color}[{name}]".format(color = color, name = name)
         st.button(label=label, key=name, 
                   on_click=bt_guess, args=[name],
                   disabled=ss.clicked[name],
                   use_container_width=True
                   )
 
-#st.write(ss.guessed)
+st.write(ss.guessed)
 # REVEAL TEAMS   
 if 'role' in ss and not ss.role:
     for key, val in ss.by_team.items():
-        st.text(("{key}({color}): {val}").format(color=colors[key], val=val, key = key))
+        st.markdown(("{key}({color}): {val}").format(color=colors[key], val=val, key = key))
 
 for i in range(len(ss.cm_logs)):
     st.text("Clue: ")

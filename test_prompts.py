@@ -13,7 +13,7 @@ client = OpenAI(api_key=OPEN_AI_API_KEY)
 def create_prompt(template, replacements):  
     return template.format(**replacements)
 
-def gen_clue(red_words, blue_words, neutral_words, assassin_word):
+def gen_clue(red_words, blue_words, neutral_words, assassin_word, prev_clues):
     # print("GENERATING CLUE")
     #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
     # prompt = """
@@ -46,16 +46,15 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
         CODENAME SPYMASTERS MUST FOLLOW THESE CLUE CREATION RULES:
             THE CLUE MUST BE RELATED BY MEANING
             THE CLUE CANNOT BE PURELY PHONETICALLY RELATED, A HOMONYM, A PART OF THE WORDS(OR VICE VERSA) THAT IT IS MEANT TO INDICATE.
-            THE CLUE MUST BE ONLY ONE WORD.
+            THE CLUE MUST BE ONLY ONE WORD AND MAY NOT BE ANY OF THESE WORDS: {prev_clues}.
         YOU ARE THE ASSISTANT FOR THE RED SPYMASTER IN A CODENAMES MATCH.
         THE RED SPYMASTER'S IS ASKING FOR ASSISTANCE. 
         RED WORDS={red_words},
         BLUE WORDS={blue_words},
         CIVILIAN WORDS={neutral_words},
         ASSASSIN={assassin_word}.
-        THE CLUE MUST BE STRONGLY RELATED TO ONE OR MORE RED WORDS AND BE THROUGHOULY UNRELATED TO ALL BLUE WORDS, CIVILIAN WORDS, AND ESPECIALLY THE ASSASSIN WORD. 
-        GIVE THE CLUE FOLLOWED BY THE RED WORDS ({red_words}) THAT THE CLUE AIMS TO INDICATE.
-        THE FORMAT IS [WORD: GUESSES]>(INDICATED WORDS).
+        THE CLUE MUST BE STRONGLY RELATED TO 1+ RED WORDS AND COMPLETELY UNRELATED TO ALL BLUE AND CIVILIAN WORDS AND ESPECIALLY THE ASSASSIN WORD. 
+        GIVE THE CLUE FOLLOWED BY THE RED WORDS ({red_words}) THAT THE CLUE AIMS TO INDICATE IN THE FORMAT IS [WORD: GUESSES]>(INDICATED WORDS).
         THE CLUE NUMBER OF GUESSES MAY NOT BE MORE THAN THE AMOUNT OF RED WORDS.
         DO NOT RETURN ANYTHING ELSE.
     """
@@ -104,13 +103,22 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word):
         'red_words' : red_words,
         'blue_words' : blue_words,
         'neutral_words' : neutral_words,
-        'assassin_word' : assassin_word
+        'assassin_word' : assassin_word,
     }
+
+    replacements2 = {
+        'red_words' : red_words,
+        'blue_words' : blue_words,
+        'neutral_words' : neutral_words,
+        'assassin_word' : assassin_word,
+        'prev_clues': prev_clues
+    }
+
 
     
 
     old_prompt = prompt
-    prompt = create_prompt(prompt, replacements)
+    prompt = create_prompt(prompt, replacements2)
 
     msgs = []
     for i in range(len(usr_prompts)):
