@@ -14,34 +14,6 @@ def create_prompt(template, replacements):
     return template.format(**replacements)
 
 def gen_clue(red_words, blue_words, neutral_words, assassin_word, prev_clues):
-    # print("GENERATING CLUE")
-    #prompt = f"Act as a spymaster in Codenames game. Provide a one-word clue that relates to these words: {', '.join(words)}."
-    # prompt = """
-    #     YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME.
-    #     GIVE A WORD TO CONNECT ONE OR TWO OF THE {red_words} WHICH HAS NO CONNECTION TO: {blue_words},{neutral_words}
-    #     AVOID ANY CONNECTION TO THIS WORD AT ALL COSTS {assassin_word}.
-    #     THE CLUE MUST BE ONLY ONE WORD AND MAY NOT APPEAR IN THE GIVEN WORDS.
-    #     RETURN A LIST OF WORD(S) IN THE GIVEN WORDS THAT YOUR CLUE AIMS TO INDICATE; THE NUMBER OF WORDS WILL BE THE NUMBER OF GUESSES ALLOWED IN THE CLUE.
-    #     DO NOT RETURN ANYTHING ELSE.
-    # """
-    # prompt2 = """
-    #     YOU ARE NOW THE RED CODEMASTER IN A CODENAMES GAME
-    #     RED WORDS: {red_words},
-    #     BLUE WORDS: {blue_words},
-    #     CIVILIAN WORDS: {neutral_words},
-    #     ASSASSIN: {assassin_word}.
-    #     DOES THERE EXIST A BETTER {clue} FOR THE RED TEAM?
-    #     IF NOT:
-    #         1. RETURN THE SAME CLUE. 
-    #     IF YES: 
-    #         1. MODIFY THE CLUE OR CREATE A NEW HUMAN CLUE TO MAXIMIZE RED TEAM'S CHANCES OF WINNING WHILE AVOIDING THE ASSASSIN WORD GIVEN THESE TEAMS:
-    #             RED WORDS: {red_words},
-    #             BLUE WORDS: {blue_words},
-    #             CIVILIAN WORDS: {neutral_words},
-    #             ASSASSIN: {assassin_word}.
-    #         3. YOUR CLUE MAY NOT HAVE APPEARED IN ANY OF THESE WORDS AND MUST BE ONE WORD ONLY AND THE CLUE NUMBER MAY NOT BE MORE THAN THE AMOUNT OF RED WORDS. 
-    #         4. RETURN THE CLUE FOLLOWED BY A LIST OF THE RED TEAM WORDS THAT THE CLUE AIMS TO INDICATE.
-    #     """
     prompt = """
         CODENAME SPYMASTERS MUST FOLLOW THESE CLUE CREATION RULES:
             THE CLUE MUST BE RELATED BY MEANING
@@ -53,36 +25,37 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word, prev_clues):
         BLUE WORDS={blue_words},
         CIVILIAN WORDS={neutral_words},
         ASSASSIN={assassin_word}.
-        THE CLUE MUST BE STRONGLY RELATED TO 1+ RED WORDS AND COMPLETELY UNRELATED TO ALL BLUE AND CIVILIAN WORDS AND ESPECIALLY THE ASSASSIN WORD. 
-        GIVE THE CLUE FOLLOWED BY THE RED WORDS ({red_words}) THAT THE CLUE AIMS TO INDICATE IN THE FORMAT IS [WORD: GUESSES]>(INDICATED WORDS).
-        THE CLUE NUMBER OF GUESSES MAY NOT BE MORE THAN THE AMOUNT OF RED WORDS.
+        THE CLUE MUST RELATED ATLEAST ONE RED WORD AND ALSO HAVE ABSOLUTE ZERO RELATION TO THE ASSASSIN WORD.
+        THE CLUE MUST ALSO HAVE ZERO RELATION TO EVERY BLUE AND CIVILIAN WORD.
+        THE NUMBER OF RED WORDS THE CLUE STRONGLY RELATES TO IS THE NUMBER OF ALLOWED GUESSES. 
+        GIVE THE CLUE FOLLOWED BY THE RED WORDS ({red_words}) THAT THE CLUE AIMS TO INDICATE IN THE FORMAT IS [WORD: ALLOWED GUESSES]>(INDICATED WORDS).
         DO NOT RETURN ANYTHING ELSE.
     """
     usr_prompts = [
-        {
-            'red_words': ['BOMB', 'OPERA', 'PISTOL', 'BARK', 'BATTERY', 'DISEASE', 'ROW', 'BEAR'],
-            'blue_words': ['MARBLE', 'MILLIONAIRE', 'PORT', 'BOTTLE', 'TAP', 'VAN', 'NEEDLE', 'PUMPKIN'],
-            'neutral_words': ['BAR', 'ICE', 'BERLIN', 'PLOT', 'CYCLE', 'BOLT', 'RULER', 'CAT'],
-            'assassin_word': ['KNIGHT'],
-        },
-        {
-            'red_words': ['COLD', 'WAR', 'NUT', 'BELT', 'WEB', 'PLATE', 'WORM', 'RING'],
-            'blue_words': ['OPERA', 'BOOM', 'HEAD', 'MICROSCOPE', 'STRING', 'GLOVE', 'BOARD', 'TRACK', 'CLOAK'],
-            'neutral_words': ['STAR', 'SERVER', 'TUBE', 'LUCK', 'BRUSH', 'ROUND', 'POINT'],
-            'assassin_word': ['CIRCLE'],
-        },
-        {
-            "red_words": ["ANGEL", "STAR", "BOX", "PARK", "KID", "SWITCH", "TAIL", "BUG", "TABLE"],
-            "blue_words": ["STAFF", "COPPER", "EUROPE", "PRESS", "CELL", "SCORPION", "WORM", "DUCK"],
-            "neutral_words": ["BOLT", "MOSCOW", "APPLE", "COTTON", "SPINE", "DISEASE", "SERVER"],
-            "assassin_word": ["SKYSCRAPER"],
-        },
-        {
-            "red_words" : ["WALL", "WASHINGTON", "RABBIT", "GIANT", "ICE CREAM", "TOOTH", "HONEY", "NEEDLE"],
-            "blue_words" : ["MASS", "CHURCH", "HORSESHOE", "SHADOW", "KING", "CIRCLE", "TRACK"],
-            "neutral_words" : ["SCHOOL", "WAR", "SOUND", "TAP", "NURSE", "MOON", "ROOT", "NIGHT", "TABLET"],
-            "assassin_word" : ["NINJA"],
-        },
+        # {
+        #     'red_words': ['BOMB', 'OPERA', 'PISTOL', 'BARK', 'BATTERY', 'DISEASE', 'ROW', 'BEAR'],
+        #     'blue_words': ['MARBLE', 'MILLIONAIRE', 'PORT', 'BOTTLE', 'TAP', 'VAN', 'NEEDLE', 'PUMPKIN'],
+        #     'neutral_words': ['BAR', 'ICE', 'BERLIN', 'PLOT', 'CYCLE', 'BOLT', 'RULER', 'CAT'],
+        #     'assassin_word': ['KNIGHT'],
+        # },
+        # {
+        #     'red_words': ['COLD', 'WAR', 'NUT', 'BELT', 'WEB', 'PLATE', 'WORM', 'RING'],
+        #     'blue_words': ['OPERA', 'BOOM', 'HEAD', 'MICROSCOPE', 'STRING', 'GLOVE', 'BOARD', 'TRACK', 'CLOAK'],
+        #     'neutral_words': ['STAR', 'SERVER', 'TUBE', 'LUCK', 'BRUSH', 'ROUND', 'POINT'],
+        #     'assassin_word': ['CIRCLE'],
+        # },
+        # {
+        #     "red_words": ["ANGEL", "STAR", "BOX", "PARK", "KID", "SWITCH", "TAIL", "BUG", "TABLE"],
+        #     "blue_words": ["STAFF", "COPPER", "EUROPE", "PRESS", "CELL", "SCORPION", "WORM", "DUCK"],
+        #     "neutral_words": ["BOLT", "MOSCOW", "APPLE", "COTTON", "SPINE", "DISEASE", "SERVER"],
+        #     "assassin_word": ["SKYSCRAPER"],
+        # },
+        # {
+        #     "red_words" : ["WALL", "WASHINGTON", "RABBIT", "GIANT", "ICE CREAM", "TOOTH", "HONEY", "NEEDLE"],
+        #     "blue_words" : ["MASS", "CHURCH", "HORSESHOE", "SHADOW", "KING", "CIRCLE", "TRACK"],
+        #     "neutral_words" : ["SCHOOL", "WAR", "SOUND", "TAP", "NURSE", "MOON", "ROOT", "NIGHT", "TABLET"],
+        #     "assassin_word" : ["NINJA"],
+        # },
         {
             "red_words" : ["MOUTH", "TELESCOPE", "ALPS", "HOSPITAL", "DRILL", "OLYMPUS", "GAME", "MOUNT"],
             "blue_words" : ["MATCH", "HORSE", "TURKEY", "CHEST", "SCHOOL", "PIT", "FIRE"],
@@ -92,10 +65,10 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word, prev_clues):
     ]
 
     outputs = [
-        '["LOUD", 4]>(BOMB, OPERA, PISTOL, BARK)',
-        '["USSR", 2]>(COLD, WAR)',
-        '["CHRISTMAS", 3]>(ANGEL, STAR, BOX)',
-        '["SWEET", 2]>(HONEY, ICE CREAM)',
+        # '["LOUD", 4]>(BOMB, OPERA, PISTOL, BARK)',
+        # '["USSR", 2]>(COLD, WAR)',
+        # '["CHRISTMAS", 3]>(ANGEL, STAR, BOX)',
+        # '["SWEET", 2]>(HONEY, ICE CREAM)',
         '["SUMMIT", 3]>(MOUNT, ALPS, OLYMPUS)'
     ]
 
@@ -143,62 +116,30 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word, prev_clues):
             "content": prompt,
         },
     )
- 
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo-0125",
-        messages=msgs
-    )
 
-    clue = response.choices[0].message.content
-    print("CLUE 1: " + clue)
-
-    curr_clue = clue
+    done = False
     clues = []
-    while curr_clue.split(">")[0] not in clues:
-        for repl in replacements:
-            random.shuffle(replacements[repl])
+    while not done:
+        random.shuffle(replacements['red_words'])
         prompt = create_prompt(prompt, replacements)
+        msgs[-1] = {
+            "role": "user",
+            "content": prompt,
+        }
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-0125",
             messages=msgs
         )
-        clues.append(curr_clue.split(">")[0])
         curr_clue = response.choices[0].message.content
+        if curr_clue.split(">")[0] in clues:
+            done = True
+        clues.append(curr_clue.split(">")[0])
         print("CURRENT CLUE: " + curr_clue)
     print("CLUE MATCH: " + curr_clue)
 
-
-    # replacements2 = {
-    #     'red_words' : red_words,
-    #     'blue_words' : blue_words,
-    #     'neutral_words' : neutral_words,
-    #     'assassin_word' : assassin_word,
-    #     'clue' : clue
-    # }
-
-    # old_clue = clue
     
-    # prompt2 = create_prompt(prompt2, replacements2)
-    # response2 = client.chat.completions.create(
-    #     model="gpt-3.5-turbo-0125",
-    #     messages=msgs
-    # )
 
-    # clues = [old_clue.split(">")[0]]
-    # curr_clue = response2.choices[0].message.content
-    # while curr_clue.split(">")[0] not in clues:
-    #     replacements2['clue'] = curr_clue
-    #     prompt2 = create_prompt(prompt2, replacements2)
-    #     response2 = client.chat.completions.create(
-    #         model="gpt-3.5-turbo-0125",
-    #         messages=msgs
-    #     )
-    #     old_clue = curr_clue
-    #     clues.append(old_clue.split(">")[0])
-    #     curr_clue = response2.choices[0].message.content
-    #     print("CURRENT CLUE: " + curr_clue)
-    # print("CLUE MATCH: " + curr_clue)
-    # print(clue)
+
     return curr_clue, old_prompt
 
 def gen_guess(clue, board_words):
