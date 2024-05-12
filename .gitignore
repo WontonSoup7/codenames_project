@@ -1,7 +1,8 @@
 text-generation-webui
 data
 *.sql
-
+*.db
+!codenames.db
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

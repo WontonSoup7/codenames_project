@@ -9,6 +9,20 @@ from test_prompts import gen_guess
 # from semi_prompts import gen_clue
 # from semi_prompts import gen_guess
 from db_functions import *
+from git import Repo
+
+PATH_OF_GIT_REPO = r'.'  # make sure .git folder is properly configured
+COMMIT_MESSAGE = 'Update Databse'
+
+def git_push():
+    try:
+        repo = Repo(PATH_OF_GIT_REPO)
+        repo.git.add(update=True)
+        repo.index.commit(COMMIT_MESSAGE)
+        origin = repo.remote(name='origin')
+        origin.push()
+    except:
+        print('Some error occured while pushing the code')    
 
 st.title("Codenames")
 
@@ -144,6 +158,8 @@ def guess(name):
 
         #ss.game_id = generate_unique_game_id()
         ss.curr_dict = {}
+        git_push()
+
         return True
     elif team != "Red":
         ss.gs_left = 0
