@@ -12,7 +12,7 @@ from db_functions import *
 from git import Repo
 
 PATH_OF_GIT_REPO = r'.'  # make sure .git folder is properly configured
-COMMIT_MESSAGE = 'Update Databse'
+COMMIT_MESSAGE = 'Update Database'
 
 def git_push():
     try:
