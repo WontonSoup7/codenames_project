@@ -321,7 +321,7 @@ if os.path.exists(db_file_path):
     # Open the file in binary mode
     with open(db_file_path, "rb") as file:
         btn = st.download_button(
-            label="Download SQLite Database",
+            label="Download Data",
             data=file,
             file_name="3.5oneshot.db",
             mime="application/octet-stream"
