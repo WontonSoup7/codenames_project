@@ -149,63 +149,64 @@ def gen_guess(clue, board_words):
     YOU ARE GIVEN THE CLUE: {clue} AND THE LIST OF WORDS ON THE BOARD: {board_words}. 
     CHOOSE WORDS FROM THE BOARD MOST ASSOCIATED WITH THE CLUE IN DESCENDING ORDER: [BEST GUESS, SECOND BEST GUESS, THIRD BEST GUEST,...].
     THERE MUST BE {clue[1]} NUMBER OF GUESSES AND EACH GUESS FROM {board_words} MUST BE ORDERED FROM BEST GUESS TO WORST GUESS.
+    GUESSES NOT IN THIS LIST: {board_words} ARE INVALID.
     THE NUMBER OF GUESSES MUST MATCH THE NUMBER PROVIDED IN THE CLUE.
     DO NOT RETURN ANYTHING ELSE BESIDES YOUR ARRAY OF GUESSES.
     NONE OF THE GUESSES CAN BE {clue[0]}.
     """
 
     usr_prompts = [
-            {
-                'board_words': """['BOMB', 'OPERA', 'PISTOL', 'BARK', 'BATTERY', 'DISEASE', 'ROW', 'BEAR',
-                    'MARBLE', 'MILLIONAIRE', 'PORT', 'BOTTLE', 'TAP', 'VAN', 'NEEDLE', 'PUMPKIN',
-                    'BAR', 'ICE', 'BERLIN', 'PLOT', 'CYCLE', 'BOLT', 'RULER', 'CAT','KNIGHT']""",
-                'clue': ["LOUD", 4]
-            },
-            {
-                'board_words': """['COLD', 'WAR', 'NUT', 'BELT', 'WEB', 'PLATE', 'WORM', 'RING',
-                    'OPERA', 'BOOM', 'HEAD', 'MICROSCOPE', 'STRING', 'GLOVE', 'BOARD', 'TRACK', 'CLOAK',
-                    'STAR', 'SERVER', 'TUBE', 'LUCK', 'BRUSH', 'ROUND', 'POINT','CIRCLE']""",
-                'clue': ["USSR", 2]
-            },
-            {
-                'board_words': """['SKYSCRAPER', 'TAIL', 'SPINE', 'WORM', 
-                'STAFF', 'MOSCOW', 'BOLT', 'SERVER', 'PRESS', 
-                'KID', 'DUCK', 'SCORPION', 'ANGEL', 'TABLE', 'COTTON', 
-                'APPLE', 'BOX', 'BUG', 'EUROPE', 'CELL', 'DISEASE', 
-                'COPPER', 'STAR', 'SWITCH', 'PARK']""",
-                'clue':["CHRISTMAS", 3]
-            },
-            {
-                'board_words': """["PIRATE", "SUIT", "OLYMPUS", "KNIFE", 
-                "BEACH", "HEAD", "BALL", "SCORPION", "HOLLYWOOD", "HORSESHOE", 
-                "BUCK", "TOOTH", "CYCLE", "MAPLE", "SKYSCRAPER", "VET", 
-                "BATTERY", "FILM", "CLOAK", "CHECK", 
-                "SHAKESPEARE", "MILLIONAIRE", "MUG", "BOOT", "FOREST"]""",
-                'clue':["ISLAND", 2]
-            },
-            {
-                'board_words': """["TURKEY", "SLUG", "WORM", "PLATE",
-                "BERRY", "MINT", "FIGHTER", "CONDUCTOR",
-                "LOCK", "LINE", "CRICKET", "CAST", "PLOT",
-                "THUMB", "SHOE", "CANADA", "LIFE", "NAIL", "TOWER",
-                "SPACE", "EMBASSY", "AIR", "STREAM", "PART", "JACK"]""",
-                'clue':["RECIPE", 4]            
-            },
-            {
-                'board_words': """["SMUGGLER", "RING", "NOVEL", "FLUTE",
-                "WITCH", "AMBULANCE", "BOTTLE", "HAND",
-                "MAIL", "GIANT", "HORSESHOE", "GRASS", 
-                "KANGAROO", "PASTE", "COMIC", "CASINO", 
-                "CALF", "RABBIT", "SPINE", "ARM", 
-                "SCREEN", "LITTER", "DATE", "SHOE", "BUFFALO"]""",
-                'clue':["MEDICINE", 2]
-            },
-            {
-                'board_words': """["WALL", "WASHINGTON", "RABBIT", "GIANT", "ICE CREAM", "TOOTH", "HONEY", "NEEDLE",
-                "MASS", "CHURCH", "HORSESHOE", "SHADOW", "KING", "CIRCLE", "TRACK", 
-                "SCHOOL", "WAR", "SOUND", "TAP", "NURSE", "MOON", "ROOT", "NIGHT", "TABLET", "NINJA"]""",
-                'clue':["SWEET", 2]
-            },
+            # {
+            #     'board_words': """['BOMB', 'OPERA', 'PISTOL', 'BARK', 'BATTERY', 'DISEASE', 'ROW', 'BEAR',
+            #         'MARBLE', 'MILLIONAIRE', 'PORT', 'BOTTLE', 'TAP', 'VAN', 'NEEDLE', 'PUMPKIN',
+            #         'BAR', 'ICE', 'BERLIN', 'PLOT', 'CYCLE', 'BOLT', 'RULER', 'CAT','KNIGHT']""",
+            #     'clue': ["LOUD", 4]
+            # },
+            # {
+            #     'board_words': """['COLD', 'WAR', 'NUT', 'BELT', 'WEB', 'PLATE', 'WORM', 'RING',
+            #         'OPERA', 'BOOM', 'HEAD', 'MICROSCOPE', 'STRING', 'GLOVE', 'BOARD', 'TRACK', 'CLOAK',
+            #         'STAR', 'SERVER', 'TUBE', 'LUCK', 'BRUSH', 'ROUND', 'POINT','CIRCLE']""",
+            #     'clue': ["USSR", 2]
+            # },
+            # {
+            #     'board_words': """['SKYSCRAPER', 'TAIL', 'SPINE', 'WORM', 
+            #     'STAFF', 'MOSCOW', 'BOLT', 'SERVER', 'PRESS', 
+            #     'KID', 'DUCK', 'SCORPION', 'ANGEL', 'TABLE', 'COTTON', 
+            #     'APPLE', 'BOX', 'BUG', 'EUROPE', 'CELL', 'DISEASE', 
+            #     'COPPER', 'STAR', 'SWITCH', 'PARK']""",
+            #     'clue':["CHRISTMAS", 3]
+            # },
+            # {
+            #     'board_words': """["PIRATE", "SUIT", "OLYMPUS", "KNIFE", 
+            #     "BEACH", "HEAD", "BALL", "SCORPION", "HOLLYWOOD", "HORSESHOE", 
+            #     "BUCK", "TOOTH", "CYCLE", "MAPLE", "SKYSCRAPER", "VET", 
+            #     "BATTERY", "FILM", "CLOAK", "CHECK", 
+            #     "SHAKESPEARE", "MILLIONAIRE", "MUG", "BOOT", "FOREST"]""",
+            #     'clue':["ISLAND", 2]
+            # },
+            # {
+            #     'board_words': """["TURKEY", "SLUG", "WORM", "PLATE",
+            #     "BERRY", "MINT", "FIGHTER", "CONDUCTOR",
+            #     "LOCK", "LINE", "CRICKET", "CAST", "PLOT",
+            #     "THUMB", "SHOE", "CANADA", "LIFE", "NAIL", "TOWER",
+            #     "SPACE", "EMBASSY", "AIR", "STREAM", "PART", "JACK"]""",
+            #     'clue':["RECIPE", 4]            
+            # },
+            # {
+            #     'board_words': """["SMUGGLER", "RING", "NOVEL", "FLUTE",
+            #     "WITCH", "AMBULANCE", "BOTTLE", "HAND",
+            #     "MAIL", "GIANT", "HORSESHOE", "GRASS", 
+            #     "KANGAROO", "PASTE", "COMIC", "CASINO", 
+            #     "CALF", "RABBIT", "SPINE", "ARM", 
+            #     "SCREEN", "LITTER", "DATE", "SHOE", "BUFFALO"]""",
+            #     'clue':["MEDICINE", 2]
+            # },
+            # {
+            #     'board_words': """["WALL", "WASHINGTON", "RABBIT", "GIANT", "ICE CREAM", "TOOTH", "HONEY", "NEEDLE",
+            #     "MASS", "CHURCH", "HORSESHOE", "SHADOW", "KING", "CIRCLE", "TRACK", 
+            #     "SCHOOL", "WAR", "SOUND", "TAP", "NURSE", "MOON", "ROOT", "NIGHT", "TABLET", "NINJA"]""",
+            #     'clue':["SWEET", 2]
+            # },
             {
                 'board_words': """["MOUTH", "TELESCOPE", "ALPS", "HOSPITAL", "DRILL", "OLYMPUS", "GAME", "MOUNT",
                 "MATCH", "HORSE", "TURKEY", "CHEST", "SCHOOL", "PIT", "FIRE", "PLATE",
@@ -216,13 +217,13 @@ def gen_guess(clue, board_words):
         ]
 
     outputs = [
-        '["BOMB", "OPERA", "PISTOL", "BARK"]',
-        '["COLD", "WAR"]',
-        '["ANGEL", "STAR", "BOX"]',
-        '["BEACH", "PIRATE"]',
-        '["PLATE", "BERRY", "TURKEY", "MINT"]',
-        '["AMBULANCE", "BOTTLE"]',
-        '["HONEY", "ICE CREAM"]',
+        # '["BOMB", "OPERA", "PISTOL", "BARK"]',
+        # '["COLD", "WAR"]',
+        # '["ANGEL", "STAR", "BOX"]',
+        # '["BEACH", "PIRATE"]',
+        # '["PLATE", "BERRY", "TURKEY", "MINT"]',
+        # '["AMBULANCE", "BOTTLE"]',
+        # '["HONEY", "ICE CREAM"]',
         '["MOUNT", "ALPS", "OLYMPUS"]',
     ]
     replacements = {
