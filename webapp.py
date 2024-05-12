@@ -17,6 +17,7 @@ COMMIT_MESSAGE = 'Update Database'
 def git_push():
     # try:
         repo = Repo(PATH_OF_GIT_REPO)
+        print (repo)
         repo.git.add(all=True)
         repo.index.commit(COMMIT_MESSAGE)
         origin = repo.remote(name='origin')

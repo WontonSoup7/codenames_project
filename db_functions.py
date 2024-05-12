@@ -2,7 +2,7 @@ import sqlite3
 import json
 
 def get_db_connection():
-    conn = sqlite3.connect('codenames.db', timeout=60)
+    conn = sqlite3.connect('3.5oneshot.db', timeout=60)
     return conn
 
 def create_tables():
