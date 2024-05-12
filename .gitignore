@@ -8,7 +8,7 @@ api_MS.py
 api.py
 semi_prompts.py
 test_local.py
-.csv
+*.csv
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
