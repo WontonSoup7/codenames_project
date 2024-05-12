@@ -265,7 +265,8 @@ def call_guesser():
         print(e)
 
     
-
+st.text("You are on the RED TEAM")
+st.text("How to play codenames: https://www.youtube.com/watch?v=WErB95Brgbs")
 txt_input = st.text_input(label= "Enter Clue",
     key = "user_input",
     label_visibility="collapsed",
@@ -278,7 +279,7 @@ if "clue" in ss and ss.curr_dict:
     st.text(ss.clue_word + ": " + str(ss.clue[1])) 
     st.text("Guesses remaining: " + str(ss.gs_left))
 elif "role" in ss and not ss.role:
-    st.text("Please enter a clue formatted as WORD: GUESSES")
+    st.text("Please enter a clue formatted as WORD: NUMBER_OF_GUESSES")
 
 colors = {"Red":"red", "Blue":"blue", "Neutral":"green", "Assassin":"rainbow"}
 # GAME BOARD
