@@ -9,20 +9,21 @@ from test_prompts import gen_guess
 # from semi_prompts import gen_clue
 # from semi_prompts import gen_guess
 from db_functions import *
-from git import Repo
+import os
 
-PATH_OF_GIT_REPO = r'.'  # make sure .git folder is properly configured
-COMMIT_MESSAGE = 'Update Database'
+db_file_path = "4.0oneshot.db"
+if os.path.exists(db_file_path):
+    # Open the file in binary mode
+    with open(db_file_path, "rb") as file:
+        btn = st.download_button(
+            label="Download Data",
+            data=file,
+            file_name="4.0oneshot.db",
+            mime="application/octet-stream"
+        )
+else:
+    st.error("File not found!")
 
-def git_push():
-    try:
-        repo = Repo(PATH_OF_GIT_REPO)
-        repo.git.add(all=True)
-        repo.index.commit(COMMIT_MESSAGE)
-        origin = repo.remote(name='origin')
-        origin.push()
-    except:
-        print('Some error occured while pushing the code')    
 
 st.title("Codenames")
 
@@ -35,7 +36,7 @@ def clear_ss():
 with st.columns([2, 1, 2])[1]:
     st.button("New Game", on_click=clear_ss)
 
-conn = sqlite3.connect('4.0oneshot.db', timeout=60)
+conn = sqlite3.connect('3.4.0oneshot.db', timeout=60)
 c = conn.cursor()
 
 create_tables()
@@ -158,7 +159,6 @@ def guess(name):
 
         #ss.game_id = generate_unique_game_id()
         ss.curr_dict = {}
-        git_push()
 
         return True
     elif team != "Red":
@@ -325,6 +325,8 @@ for i in range(len(ss.cm_logs)):
     st.text(ss.cm_logs[i])
     st.text("Guesses: ")
     st.text(ss.gs_logs[i])
+
+
 
 if not ss.game_started and len(ss.cm_logs):
     ss.write("Total turns: ", len(ss.cm_logs))
