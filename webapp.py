@@ -11,8 +11,18 @@ from test_prompts import gen_guess
 from db_functions import *
 import os
 
-PATH_OF_GIT_REPO = r'.'  # make sure .git folder is properly configured
-COMMIT_MESSAGE = 'Update Database'
+db_file_path = "3.5oneshot.db"
+if os.path.exists(db_file_path):
+    # Open the file in binary mode
+    with open(db_file_path, "rb") as file:
+        btn = st.download_button(
+            label="Download Data",
+            data=file,
+            file_name="3.5oneshot.db",
+            mime="application/octet-stream"
+        )
+else:
+    st.error("File not found!")
 
 
 st.title("Codenames")
@@ -316,18 +326,7 @@ for i in range(len(ss.cm_logs)):
     st.text("Guesses: ")
     st.text(ss.gs_logs[i])
 
-db_file_path = "3.5oneshot.db"
-if os.path.exists(db_file_path):
-    # Open the file in binary mode
-    with open(db_file_path, "rb") as file:
-        btn = st.download_button(
-            label="Download Data",
-            data=file,
-            file_name="3.5oneshot.db",
-            mime="application/octet-stream"
-        )
-else:
-    st.error("File not found!")
+
 
 if not ss.game_started and len(ss.cm_logs):
     ss.write("Total turns: ", len(ss.cm_logs))
