@@ -1,8 +1,6 @@
 text-generation-webui
 data
 *.sql
-*.db
-!codenames.db
 api_MS_2.py
 api_MS.py
 api.py
