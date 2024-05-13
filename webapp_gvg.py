@@ -18,7 +18,7 @@ with st.columns([2, 1, 2])[1]:
     st.button("New Game", on_click=clear_ss)
 
 
-conn = sqlite3.connect('codenames.db', timeout=60)
+conn = sqlite3.connect('3-5oneshotgvg.db', timeout=60)
 c = conn.cursor()
 
 create_tables()
