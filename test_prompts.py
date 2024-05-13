@@ -4,6 +4,7 @@ import random
 
 from dotenv import load_dotenv
 import os
+import time
 
 # Load your API key from an environment variable
 load_dotenv()
@@ -25,7 +26,7 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word, prev_clues):
         BLUE WORDS={blue_words},
         CIVILIAN WORDS={neutral_words},
         ASSASSIN={assassin_word}.
-        THE CLUE MUST RELATE ATLEAST ONE RED WORD AND ALSO HAVE ABSOLUTE ZERO RELATION TO THE ASSASSIN WORD.
+        THE CLUE MUST RELATE TO ATLEAST ONE RED WORD AND ALSO HAVE ABSOLUTE ZERO RELATION TO THE ASSASSIN WORD.
         THE CLUE MUST ALSO HAVE ZERO RELATION TO EVERY BLUE AND CIVILIAN WORD.
         THE NUMBER OF RED WORDS THE CLUE STRONGLY RELATES TO IS THE NUMBER OF ALLOWED GUESSES. 
         GIVE THE CLUE FOLLOWED BY THE RED WORDS ({red_words}) THAT THE CLUE AIMS TO INDICATE IN THE FORMAT IS [WORD: ALLOWED GUESSES]>(INDICATED WORDS).
@@ -134,6 +135,7 @@ def gen_clue(red_words, blue_words, neutral_words, assassin_word, prev_clues):
         if curr_clue.split(">")[0] in clues:
             done = True
         clues.append(curr_clue.split(">")[0])
+        time.sleep(2)
         print("CURRENT CLUE: " + curr_clue)
     print("CLUE MATCH: " + curr_clue)
 
